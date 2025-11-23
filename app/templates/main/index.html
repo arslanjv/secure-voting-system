@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Secure Voting System{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="row my-5">
+    <div class="col-lg-12 text-center">
+        <h1 class="display-3 fw-bold">
+            <i class="bi bi-shield-check text-primary"></i><br>
+            Secure Online Voting System
+        </h1>
+        <p class="lead mt-3">
+            Cast your vote with confidence using military-grade encryption and cryptographic verification
+        </p>
+
+        {% if active_elections > 0 %}
+        <div class="alert alert-info mt-4">
+            <i class="bi bi-info-circle"></i>
+            <strong>{{ active_elections }}</strong> election{{ 's' if active_elections != 1 else '' }} currently active!
+        </div>
+        {% endif %}
+
+        <div class="mt-4">
+            {% if current_user.is_authenticated %}
+            {% if current_user.has_role('voter') %}
+            <a href="{{ url_for('voter.dashboard') }}" class="btn btn-primary btn-lg">
+                <i class="bi bi-speedometer2"></i> Go to Dashboard
+            </a>
+            {% elif current_user.has_role('administrator') %}
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary btn-lg">
+                <i class="bi bi-gear"></i> Admin Panel
+            </a>
+            {% elif current_user.has_role('auditor') %}
+            <a href="{{ url_for('auditor.dashboard') }}" class="btn btn-primary btn-lg">
+                <i class="bi bi-clipboard-data"></i> Audit Dashboard
+            </a>
+            {% endif %}
+            {% else %}
+            <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg me-2">
+                <i class="bi bi-box-arrow-in-right"></i> Login
+            </a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary btn-lg">
+                <i class="bi bi-person-plus"></i> Register to Vote
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="row my-5">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-lock-fill text-success" style="font-size: 3rem;"></i>
+                <h4 class="mt-3">End-to-End Encryption</h4>
+                <p class="text-muted">
+                    Your vote is encrypted with AES-256-GCM before leaving your device.
+                    Only authorized election officials can decrypt the final tally.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-shield-check text-primary" style="font-size: 3rem;"></i>
+                <h4 class="mt-3">Cryptographic Verification</h4>
+                <p class="text-muted">
+                    Each vote is digitally signed with Ed25519. You receive a verification
+                    token to confirm your vote was recorded correctly.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-eye-slash-fill text-info" style="font-size: 3rem;"></i>
+                <h4 class="mt-3">Voter Anonymity</h4>
+                <p class="text-muted">
+                    Your identity is never linked to your encrypted ballot.
+                    We cannot see how you voted, only that you voted.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-file-earmark-lock text-warning" style="font-size: 3rem;"></i>
+                <h4 class="mt-3">Immutable Audit Trail</h4>
+                <p class="text-muted">
+                    Every action is logged with cryptographic integrity.
+                    Audit logs use blockchain-style chaining for tamper-evidence.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-phone-fill text-danger" style="font-size: 3rem;"></i>
+                <h4 class="mt-3">Two-Factor Authentication</h4>
+                <p class="text-muted">
+                    Protect your account with TOTP-based 2FA.
+                    Works with Google Authenticator, Authy, and other apps.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+                <h4 class="mt-3">Individual Verifiability</h4>
+                <p class="text-muted">
+                    Verify your vote was counted correctly using your unique
+                    verification token—without revealing your choice.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Security Standards -->
+<div class="row my-5">
+    <div class="col-lg-12">
+        <div class="card bg-light">
+            <div class="card-body text-center">
+                <h3 class="mb-4">Built with Security Standards</h3>
+                <div class="row">
+                    <div class="col-md-3">
+                        <h5><i class="bi bi-shield-check text-primary"></i> OWASP Top 10</h5>
+                        <p class="text-muted small">Protection against common vulnerabilities</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h5><i class="bi bi-shield-check text-primary"></i> NIST SSDF</h5>
+                        <p class="text-muted small">Secure Software Development Framework</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h5><i class="bi bi-shield-check text-primary"></i> UMLSec</h5>
+                        <p class="text-muted small">Secure system design principles</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h5><i class="bi bi-shield-check text-primary"></i> Secure-SDLC</h5>
+                        <p class="text-muted small">Security at every development stage</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Call to Action -->
+<div class="row my-5">
+    <div class="col-lg-12 text-center">
+        <h2>Ready to Vote Securely?</h2>
+        <p class="lead">Join thousands of voters who trust our platform</p>
+        {% if not current_user.is_authenticated %}
+        <a href="{{ url_for('auth.register') }}" class="btn btn-success btn-lg">
+            <i class="bi bi-person-plus"></i> Create Account Now
+        </a>
+        {% endif %}
+        <div class="mt-3">
+            <a href="{{ url_for('voter.verify_vote') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-check-circle"></i> Verify a Vote
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

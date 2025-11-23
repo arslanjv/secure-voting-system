@@ -1,0 +1,387 @@
+{% extends "base.html" %}
+
+{% block title %}Help & FAQ{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-question-circle"></i> Help & Frequently Asked Questions</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    Find answers to common questions about using the Secure Online Voting System.
+                </div>
+
+                <h5>Getting Started</h5>
+                <div class="accordion mb-4" id="gettingStartedAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#register">
+                                How do I register for an account?
+                            </button>
+                        </h2>
+                        <div id="register" class="accordion-collapse collapse show"
+                            data-bs-parent="#gettingStartedAccordion">
+                            <div class="accordion-body">
+                                <ol>
+                                    <li>Click "Register" in the navigation menu</li>
+                                    <li>Fill in your username, email, and password</li>
+                                    <li>Password must be at least 12 characters with uppercase, lowercase, numbers, and
+                                        symbols</li>
+                                    <li>Submit the form to create your voter account</li>
+                                    <li>You'll be automatically logged in after successful registration</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#login">
+                                How do I log in?
+                            </button>
+                        </h2>
+                        <div id="login" class="accordion-collapse collapse" data-bs-parent="#gettingStartedAccordion">
+                            <div class="accordion-body">
+                                <ol>
+                                    <li>Click "Login" in the navigation menu</li>
+                                    <li>Enter your username and password</li>
+                                    <li>If you have 2FA enabled, you'll be prompted for your authenticator code</li>
+                                    <li>After 5 failed login attempts, your account will be locked for security</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#2fa">
+                                Should I enable Two-Factor Authentication?
+                            </button>
+                        </h2>
+                        <div id="2fa" class="accordion-collapse collapse" data-bs-parent="#gettingStartedAccordion">
+                            <div class="accordion-body">
+                                <p><strong>Yes, strongly recommended!</strong> 2FA adds an extra layer of security by
+                                    requiring:</p>
+                                <ul>
+                                    <li>Something you know (your password)</li>
+                                    <li>Something you have (your phone with authenticator app)</li>
+                                </ul>
+                                <p>To enable 2FA:</p>
+                                <ol>
+                                    <li>Go to Profile → Enable 2FA</li>
+                                    <li>Scan the QR code with Google Authenticator, Microsoft Authenticator, or similar
+                                        app</li>
+                                    <li>Enter the 6-digit code to confirm setup</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h5>Voting</h5>
+                <div class="accordion mb-4" id="votingAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#howToVote">
+                                How do I cast my vote?
+                            </button>
+                        </h2>
+                        <div id="howToVote" class="accordion-collapse collapse show" data-bs-parent="#votingAccordion">
+                            <div class="accordion-body">
+                                <ol>
+                                    <li>Log in to your voter account</li>
+                                    <li>Navigate to the Voter Dashboard</li>
+                                    <li>Click "Vote Now" on an active election</li>
+                                    <li>Select your candidate(s) - follow the min/max selection rules</li>
+                                    <li>Your vote is encrypted in your browser before submission</li>
+                                    <li>Click "Submit Vote" to cast your encrypted vote</li>
+                                    <li>Save your verification token for later verification</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#verifyVote">
+                                How do I verify my vote was counted?
+                            </button>
+                        </h2>
+                        <div id="verifyVote" class="accordion-collapse collapse" data-bs-parent="#votingAccordion">
+                            <div class="accordion-body">
+                                <ol>
+                                    <li>Go to Voter Dashboard → Verify Vote</li>
+                                    <li>Enter your verification token (received after voting)</li>
+                                    <li>The system will confirm your vote exists in the database</li>
+                                    <li>You'll see the cryptographic proof without revealing your actual vote choice
+                                    </li>
+                                </ol>
+                                <p class="mb-0"><strong>Note:</strong> The verification system protects your privacy -
+                                    it only confirms your vote was recorded, not what you voted for.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#changeVote">
+                                Can I change my vote after submission?
+                            </button>
+                        </h2>
+                        <div id="changeVote" class="accordion-collapse collapse" data-bs-parent="#votingAccordion">
+                            <div class="accordion-body">
+                                <strong>No.</strong> Once submitted, votes are encrypted and cannot be changed. This
+                                ensures:
+                                <ul>
+                                    <li>Vote integrity - no tampering after submission</li>
+                                    <li>Audit trail preservation</li>
+                                    <li>Protection against coercion (no one can force you to change your vote)</li>
+                                </ul>
+                                <p class="mb-0">Please review your selection carefully before submitting.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#multipleElections">
+                                Can I vote in multiple elections?
+                            </button>
+                        </h2>
+                        <div id="multipleElections" class="accordion-collapse collapse"
+                            data-bs-parent="#votingAccordion">
+                            <div class="accordion-body">
+                                <strong>Yes!</strong> You can participate in multiple elections:
+                                <ul>
+                                    <li>Each election has its own voting period</li>
+                                    <li>You can only vote once per election</li>
+                                    <li>All active elections appear on your dashboard</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h5>Security & Privacy</h5>
+                <div class="accordion mb-4" id="securityAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#voteSecret">
+                                Is my vote secret?
+                            </button>
+                        </h2>
+                        <div id="voteSecret" class="accordion-collapse collapse show"
+                            data-bs-parent="#securityAccordion">
+                            <div class="accordion-body">
+                                <strong>Yes!</strong> Your vote privacy is protected through:
+                                <ul>
+                                    <li><strong>End-to-end encryption:</strong> Votes encrypted with AES-256-GCM</li>
+                                    <li><strong>Separation of identity and vote:</strong> Your user account is not
+                                        directly linked to vote content</li>
+                                    <li><strong>Verification tokens:</strong> Let you verify without revealing your
+                                        choice</li>
+                                    <li><strong>Access controls:</strong> Only authorized administrators can decrypt
+                                        votes during official tallying</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#accountLocked">
+                                My account is locked, what do I do?
+                            </button>
+                        </h2>
+                        <div id="accountLocked" class="accordion-collapse collapse" data-bs-parent="#securityAccordion">
+                            <div class="accordion-body">
+                                <p>Accounts are automatically locked after 5 failed login attempts to prevent brute
+                                    force attacks.</p>
+                                <p><strong>To unlock your account:</strong></p>
+                                <ul>
+                                    <li>Wait 30 minutes for automatic unlock, OR</li>
+                                    <li>Contact a system administrator to manually unlock your account</li>
+                                </ul>
+                                <p class="mb-0"><strong>Tip:</strong> Enable 2FA to add extra protection against
+                                    unauthorized access attempts.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#lostToken">
+                                I lost my verification token, can I get it back?
+                            </button>
+                        </h2>
+                        <div id="lostToken" class="accordion-collapse collapse" data-bs-parent="#securityAccordion">
+                            <div class="accordion-body">
+                                <strong>No, verification tokens cannot be retrieved.</strong> For security reasons:
+                                <ul>
+                                    <li>Tokens are only displayed once after voting</li>
+                                    <li>They are not stored in your account</li>
+                                    <li>This prevents linking your identity to your specific vote</li>
+                                </ul>
+                                <p class="mb-0">However, your vote is still securely recorded and will be counted in the
+                                    final tally.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h5>Administrator Functions</h5>
+                <div class="accordion mb-4" id="adminAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#createElection">
+                                How do I create a new election? (Administrators)
+                            </button>
+                        </h2>
+                        <div id="createElection" class="accordion-collapse collapse show"
+                            data-bs-parent="#adminAccordion">
+                            <div class="accordion-body">
+                                <ol>
+                                    <li>Log in with an administrator account</li>
+                                    <li>Go to Admin Dashboard → Elections → Create Election</li>
+                                    <li>Fill in election details (title, description, dates, selection limits)</li>
+                                    <li>Add candidates to the election</li>
+                                    <li>Activate the election when ready to start voting</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#tallyVotes">
+                                How do I tally votes? (Administrators)
+                            </button>
+                        </h2>
+                        <div id="tallyVotes" class="accordion-collapse collapse" data-bs-parent="#adminAccordion">
+                            <div class="accordion-body">
+                                <ol>
+                                    <li>Ensure the election end date has passed</li>
+                                    <li>Close the election (marks it as closed, prevents further voting)</li>
+                                    <li>Go to Admin Dashboard → Elections → Tally Results</li>
+                                    <li>Re-enter your password for security verification</li>
+                                    <li>The system will decrypt and count all votes</li>
+                                    <li>Results are digitally signed and published</li>
+                                </ol>
+                                <p class="mb-0"><strong>Security:</strong> Tallying requires password re-verification
+                                    and is fully logged in the audit trail.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h5>Auditor Functions</h5>
+                <div class="accordion mb-4" id="auditorAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#viewLogs">
+                                How do I view audit logs? (Auditors)
+                            </button>
+                        </h2>
+                        <div id="viewLogs" class="accordion-collapse collapse show" data-bs-parent="#auditorAccordion">
+                            <div class="accordion-body">
+                                <ol>
+                                    <li>Log in with an auditor account</li>
+                                    <li>Go to Auditor Dashboard → View Audit Logs</li>
+                                    <li>Use filters to narrow down logs (date range, user, action type)</li>
+                                    <li>Click on individual entries to see full details</li>
+                                    <li>Export logs to CSV for offline analysis</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#verifyChain">
+                                How do I verify audit log integrity? (Auditors)
+                            </button>
+                        </h2>
+                        <div id="verifyChain" class="accordion-collapse collapse" data-bs-parent="#auditorAccordion">
+                            <div class="accordion-body">
+                                <ol>
+                                    <li>Go to Auditor Dashboard → Verify Chain Integrity</li>
+                                    <li>The system will check all audit log entries</li>
+                                    <li>Each entry's hash is verified against the next entry's previous_hash</li>
+                                    <li>Digital signatures are verified for authenticity</li>
+                                    <li>Any tampering will break the chain and be detected</li>
+                                </ol>
+                                <p class="mb-0"><strong>Result:</strong> You'll see a report showing whether the audit
+                                    log chain is intact or if any entries have been tampered with.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h5>Troubleshooting</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Problem</th>
+                                <th>Solution</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>"Rate limit exceeded" error</td>
+                                <td>You've made too many requests. Wait a few minutes and try again.</td>
+                            </tr>
+                            <tr>
+                                <td>Can't see any elections</td>
+                                <td>There may be no active elections currently. Check back later or contact
+                                    administrators.</td>
+                            </tr>
+                            <tr>
+                                <td>"Vote already cast" error</td>
+                                <td>You've already voted in this election. Each voter can only vote once per election.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2FA code not working</td>
+                                <td>Ensure your phone's time is synchronized (TOTP codes are time-based). Try the next
+                                    code that appears.</td>
+                            </tr>
+                            <tr>
+                                <td>Browser compatibility issues</td>
+                                <td>Use a modern browser (Chrome, Firefox, Edge, Safari) with JavaScript enabled. The
+                                    system requires Web Crypto API support.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="alert alert-primary mt-4">
+                    <h6><i class="bi bi-headset"></i> Still Need Help?</h6>
+                    <p class="mb-0">
+                        If you couldn't find the answer to your question, please contact the system administrators
+                        or your election organizers for assistance.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

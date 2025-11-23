@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit Election' if election else 'Create Election' }} - Admin{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-{{ 'pencil' if election else 'plus-circle' }}"></i>
+                    {{ 'Edit Election' if election else 'Create New Election' }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form.title.label(class="form-label") }}
+                        {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else ""),
+                        placeholder="e.g., Student Council Election 2024") }}
+                        {% if form.title.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.title.errors[0] }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label") }}
+                        {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""),
+                        rows=4, placeholder="Describe the election purpose and any important information for voters") }}
+                        {% if form.description.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.description.errors[0] }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.start_time.label(class="form-label") }}
+                            {{ form.start_time(class="form-control" + (" is-invalid" if form.start_time.errors else ""))
+                            }}
+                            {% if form.start_time.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.start_time.errors[0] }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            {{ form.end_time.label(class="form-label") }}
+                            {{ form.end_time(class="form-control" + (" is-invalid" if form.end_time.errors else "")) }}
+                            {% if form.end_time.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.end_time.errors[0] }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.max_selections.label(class="form-label") }}
+                        {{ form.max_selections(class="form-control" + (" is-invalid" if form.max_selections.errors else
+                        "")) }}
+                        {% if form.max_selections.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.max_selections.errors[0] }}
+                        </div>
+                        {% endif %}
+                        <small class="text-muted">Number of candidates a voter can select</small>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        {{ form.allow_multiple_votes(class="form-check-input") }}
+                        {{ form.allow_multiple_votes.label(class="form-check-label") }}
+                        <small class="d-block text-muted">If enabled, voters can change their vote before election
+                            ends</small>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Note:</strong> After creating the election, you'll be able to add candidates. The
+                        election will remain in "Draft" status until you activate it.
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
+                        <a href="{{ url_for('admin.list_elections') }}" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if election %}
+        <div class="card mt-3 bg-light">
+            <div class="card-body">
+                <h6><i class="bi bi-shield-lock"></i> Security Notice</h6>
+                <p class="mb-0 small">
+                    Elections can only be edited while in "Draft" status. Once activated, election parameters are locked
+                    to maintain security and audit integrity.
+                </p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

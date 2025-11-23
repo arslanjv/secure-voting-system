@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Audit Log Detail - Auditor{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0"><i class="bi bi-file-text-fill"></i> Audit Log Entry #{{ log.id }}</h4>
+            </div>
+            <div class="card-body">
+                <h5>Log Information</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <th width="25%">Log ID:</th>
+                                <td>{{ log.id }}</td>
+                            </tr>
+                            <tr>
+                                <th>Timestamp:</th>
+                                <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S.%f UTC') }}</td>
+                            </tr>
+                            <tr>
+                                <th>User:</th>
+                                <td><strong>{{ log.user }}</strong></td>
+                            </tr>
+                            <tr>
+                                <th>Action:</th>
+                                <td>
+                                    <span class="badge 
+                                        {% if 'login' in log.action.lower() %}bg-success
+                                        {% elif 'vote' in log.action.lower() %}bg-primary
+                                        {% elif 'tally' in log.action.lower() %}bg-warning text-dark
+                                        {% elif 'fail' in log.action.lower() %}bg-danger
+                                        {% else %}bg-secondary{% endif %}">
+                                        {{ log.action }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Details:</th>
+                                <td>
+                                    <pre class="mb-0">{{ log.details }}</pre>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>IP Address:</th>
+                                <td><code>{{ log.ip_address }}</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h5>Cryptographic Information</h5>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <p class="mb-2"><strong>Entry Hash (SHA-256):</strong></p>
+                        <code class="d-block text-break mb-3">{{ log.entry_hash }}</code>
+
+                        <p class="mb-2"><strong>Previous Entry Hash:</strong></p>
+                        <code
+                            class="d-block text-break mb-3">{{ log.previous_hash if log.previous_hash else 'N/A (First Entry)' }}</code>
+
+                        <p class="mb-2"><strong>Digital Signature (Ed25519):</strong></p>
+                        <code class="d-block text-break">{{ log.signature }}</code>
+                    </div>
+                </div>
+
+                <h5 class="mt-4">Chain Verification</h5>
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h6><i class="bi bi-shield-check"></i> Integrity Status</h6>
+                        <p class="mb-0">
+                            This log entry is part of the blockchain-style audit chain.
+                            The entry hash and signature can be independently verified.
+                            Use the "Verify Chain Integrity" feature to validate the entire chain.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <a href="{{ url_for('auditor.view_logs') }}" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left"></i> Back to Audit Logs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Users - Auditor{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0"><i class="bi bi-people"></i> All Users (Read-Only)</h4>
+            </div>
+            <div class="card-body">
+                {% if users %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="5%">ID</th>
+                                <th width="15%">Username</th>
+                                <th width="20%">Email</th>
+                                <th width="10%">Role</th>
+                                <th width="10%">Status</th>
+                                <th width="10%">2FA</th>
+                                <th width="15%">Last Login</th>
+                                <th width="15%">Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td><strong>{{ user.username }}</strong></td>
+                                <td><small>{{ user.email }}</small></td>
+                                <td>
+                                    <span class="badge 
+                                        {% if user.role.value == 'administrator' %}bg-danger
+                                        {% elif user.role.value == 'auditor' %}bg-info
+                                        {% else %}bg-primary{% endif %}">
+                                        {{ user.role.value|upper }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if user.is_locked %}
+                                    <span class="badge bg-danger">Locked</span>
+                                    {% elif not user.is_active %}
+                                    <span class="badge bg-warning text-dark">Inactive</span>
+                                    {% else %}
+                                    <span class="badge bg-success">Active</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if user.is_2fa_enabled %}
+                                    <span class="badge bg-success"><i class="bi bi-shield-check"></i> Enabled</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Disabled</span>
+                                    {% endif %}
+                                </td>
+                                <td><small>{{ user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else 'Never'
+                                        }}</small></td>
+                                <td><small>{{ user.created_at.strftime('%Y-%m-%d') }}</small></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="text-muted mt-3">
+                    <strong>Total Users:</strong> {{ users|length }}
+                </p>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    No users found in the system.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mt-3 bg-light">
+            <div class="card-body">
+                <h6><i class="bi bi-info-circle"></i> User Management Information</h6>
+                <ul class="mb-0 small">
+                    <li><strong>Role:</strong> Administrator (system management), Auditor (read-only access), Voter (can
+                        cast votes)</li>
+                    <li><strong>Status:</strong> Active (can login), Inactive (disabled), Locked (too many failed login
+                        attempts)</li>
+                    <li><strong>2FA:</strong> Two-factor authentication provides an additional security layer</li>
+                    <li>As an auditor, you have read-only access to user information</li>
+                    <li>Sensitive data like passwords are never displayed or stored in plain text</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

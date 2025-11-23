@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0"><i class="bi bi-person"></i> My Profile</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('auth.profile') }}">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Username:</strong></label>
+                        <p class="form-control-plaintext">{{ current_user.username }}</p>
+                        <small class="text-muted">Username cannot be changed</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Role:</strong></label>
+                        <p class="form-control-plaintext">
+                            <span class="badge bg-primary">{{ current_user.role.value.title() }}</span>
+                        </p>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        {{ form.email.label(class="form-label") }}
+                        {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else "")) }}
+                        {% if form.email.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.email.errors[0] }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <hr>
+                    <h5>Change Password (Optional)</h5>
+
+                    <div class="mb-3">
+                        {{ form.current_password.label(class="form-label") }}
+                        {{ form.current_password(class="form-control" + (" is-invalid" if form.current_password.errors
+                        else "")) }}
+                        {% if form.current_password.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.current_password.errors[0] }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.new_password.label(class="form-label") }}
+                        {{ form.new_password(class="form-control" + (" is-invalid" if form.new_password.errors else ""),
+                        placeholder="Leave blank to keep current password") }}
+                        {% if form.new_password.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.new_password.errors[0] }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.confirm_password.label(class="form-label") }}
+                        {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors
+                        else "")) }}
+                        {% if form.confirm_password.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.confirm_password.errors[0] }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- 2FA Status -->
+        <div class="card mb-3">
+            <div
+                class="card-header {{ 'bg-success text-white' if current_user.is_2fa_enabled else 'bg-warning text-dark' }}">
+                <h5 class="mb-0">
+                    <i class="bi bi-shield-lock"></i> Two-Factor Authentication
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if current_user.is_2fa_enabled %}
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle"></i>
+                    <strong>2FA is enabled</strong>
+                </div>
+                <p>Your account is protected with two-factor authentication.</p>
+                <form method="POST" action="{{ url_for('auth.disable_2fa') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-warning"
+                        onclick="return confirm('Are you sure you want to disable 2FA?')">
+                        <i class="bi bi-x-circle"></i> Disable 2FA
+                    </button>
+                </form>
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>2FA is not enabled</strong>
+                </div>
+                <p>Enable two-factor authentication for enhanced security.</p>
+                <a href="{{ url_for('auth.setup_2fa') }}" class="btn btn-success">
+                    <i class="bi bi-shield-plus"></i> Enable 2FA
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Account Info -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Account Information</h6>
+            </div>
+            <div class="card-body">
+                <p class="small mb-1">
+                    <strong>Account Created:</strong><br>
+                    {{ current_user.created_at.strftime('%Y-%m-%d %H:%M') }}
+                </p>
+                <p class="small mb-1">
+                    <strong>Last Login:</strong><br>
+                    {{ current_user.last_login.strftime('%Y-%m-%d %H:%M') if current_user.last_login else 'N/A' }}
+                </p>
+                <p class="small mb-0">
+                    <strong>Account Status:</strong><br>
+                    {% if current_user.is_active %}
+                    <span class="badge bg-success">Active</span>
+                    {% else %}
+                    <span class="badge bg-danger">Inactive</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

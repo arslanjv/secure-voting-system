@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0"><i class="bi bi-person-plus"></i> Register</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-envelope-check"></i>
+                    <strong>Invite Required:</strong> Registration requires a valid invite token.
+                    Contact an administrator if you don't have one.
+                </div>
+
+                <form method="POST" action="{{ url_for('auth.register') }}">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form.invite_token.label(class="form-label") }}
+                        {{ form.invite_token(class="form-control" + (" is-invalid" if form.invite_token.errors else ""),
+                        placeholder="Enter your invite token", readonly=(form.invite_token.data)) }}
+                        {% if form.invite_token.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.invite_token.errors[0] }}
+                        </div>
+                        {% endif %}
+                        <small class="form-text text-muted">
+                            You should have received this token via email or from an administrator
+                        </small>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="mb-3">
+                        {{ form.username.label(class="form-label") }}
+                        {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else ""),
+                        placeholder="Choose a username") }}
+                        {% if form.username.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.username.errors[0] }}
+                        </div>
+                        {% endif %}
+                        <small class="form-text text-muted">
+                            3-80 characters, letters, numbers, and underscores only
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.email.label(class="form-label") }}
+                        {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""),
+                        placeholder="your.email@example.com") }}
+                        {% if form.email.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.email.errors[0] }}
+                        </div>
+                        {% endif %}
+                        <small class="form-text text-muted">
+                            Must match the email address your invite was sent to
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.password.label(class="form-label") }}
+                        {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""),
+                        placeholder="Create a strong password") }}
+                        {% if form.password.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.password.errors[0] }}
+                        </div>
+                        {% endif %}
+                        <small class="form-text text-muted">
+                            Minimum 12 characters with uppercase, lowercase, number, and special character
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.confirm_password.label(class="form-label") }}
+                        {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors
+                        else ""), placeholder="Re-enter password") }}
+                        {% if form.confirm_password.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.confirm_password.errors[0] }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-success btn-lg") }}
+                    </div>
+                </form>
+
+                <hr>
+
+                <div class="text-center">
+                    <p class="mb-0">Already have an account?
+                        <a href="{{ url_for('auth.login') }}">Login here</a>
+                    </p>
+                </div>
+
+                <div class="alert alert-info mt-3">
+                    <i class="bi bi-shield-check"></i>
+                    <small>Your password is hashed with Argon2 and never stored in plain text.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

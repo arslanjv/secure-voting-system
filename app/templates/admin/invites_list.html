@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Invite Tokens - Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="bi bi-envelope-check"></i> Manage Invite Tokens</h4>
+                    <div>
+                        <a href="{{ url_for('admin.invite_single') }}" class="btn btn-light me-2">
+                            <i class="bi bi-person-plus"></i> Invite Single User
+                        </a>
+                        <a href="{{ url_for('admin.invite_bulk') }}" class="btn btn-light">
+                            <i class="bi bi-people-fill"></i> Bulk Invite
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Filter tabs -->
+                <ul class="nav nav-tabs mb-3">
+                    <li class="nav-item">
+                        <a class="nav-link {% if filter_status == 'all' %}active{% endif %}"
+                            href="{{ url_for('admin.list_invites', status='all') }}">
+                            All Invites
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if filter_status == 'pending' %}active{% endif %}"
+                            href="{{ url_for('admin.list_invites', status='pending') }}">
+                            Pending
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if filter_status == 'used' %}active{% endif %}"
+                            href="{{ url_for('admin.list_invites', status='used') }}">
+                            Used
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if filter_status == 'expired' %}active{% endif %}"
+                            href="{{ url_for('admin.list_invites', status='expired') }}">
+                            Expired
+                        </a>
+                    </li>
+                </ul>
+
+                {% if invites.items %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Email</th>
+                                <th>Created By</th>
+                                <th>Created At</th>
+                                <th>Expires At</th>
+                                <th>Status</th>
+                                <th>Used By</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for invite in invites.items %}
+                            <tr>
+                                <td><strong>{{ invite.email }}</strong></td>
+                                <td>{{ invite.creator.username }}</td>
+                                <td>{{ invite.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>{{ invite.expires_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>
+                                    {% if invite.is_used %}
+                                    <span class="badge bg-success">Used</span>
+                                    {% elif invite.is_valid() %}
+                                    <span class="badge bg-warning">Pending</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Expired</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if invite.registered_user %}
+                                    {{ invite.registered_user.username }}
+                                    <br><small class="text-muted">{{ invite.used_at.strftime('%Y-%m-%d %H:%M')
+                                        }}</small>
+                                    {% else %}
+                                    <em class="text-muted">N/A</em>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if invite.is_valid() %}
+                                    <div class="btn-group btn-group-sm">
+                                        <form method="POST"
+                                            action="{{ url_for('admin.resend_invite', invite_id=invite.id) }}"
+                                            class="d-inline">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn btn-outline-info"
+                                                title="Get registration link">
+                                                <i class="bi bi-link-45deg"></i>
+                                            </button>
+                                        </form>
+                                        <form method="POST"
+                                            action="{{ url_for('admin.revoke_invite', invite_id=invite.id) }}"
+                                            class="d-inline">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn btn-outline-danger"
+                                                onclick="return confirm('Revoke invite for {{ invite.email }}?')"
+                                                title="Revoke invite">
+                                                <i class="bi bi-x-circle"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                    {% else %}
+                                    <span class="text-muted">No actions</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if invites.pages > 1 %}
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        {% if invites.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="{{ url_for('admin.list_invites', page=invites.prev_num, status=filter_status) }}">Previous</a>
+                        </li>
+                        {% endif %}
+
+                        {% for page_num in range(1, invites.pages + 1) %}
+                        <li class="page-item {% if page_num == invites.page %}active{% endif %}">
+                            <a class="page-link"
+                                href="{{ url_for('admin.list_invites', page=page_num, status=filter_status) }}">{{
+                                page_num }}</a>
+                        </li>
+                        {% endfor %}
+
+                        {% if invites.has_next %}
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="{{ url_for('admin.list_invites', page=invites.next_num, status=filter_status) }}">Next</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    No invite tokens found.
+                    <a href="{{ url_for('admin.invite_single') }}">Create your first invite</a>.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mt-3 bg-light">
+            <div class="card-body">
+                <h6><i class="bi bi-info-circle"></i> Invite System Information</h6>
+                <ul class="mb-0 small">
+                    <li><strong>Security:</strong> Invite tokens prevent unauthorized registrations and multiple
+                        accounts per person</li>
+                    <li><strong>One-time use:</strong> Each token can only be used once to register an account</li>
+                    <li><strong>Expiration:</strong> Tokens automatically expire after the specified number of days</li>
+                    <li><strong>Email matching:</strong> Registrants must use the exact email address the invite was
+                        sent to</li>
+                    <li><strong>Revocation:</strong> Unused tokens can be revoked at any time by an administrator</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

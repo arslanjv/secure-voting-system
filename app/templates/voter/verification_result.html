@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Vote Verification Result{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        {% if vote %}
+        <div class="card border-success">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="bi bi-check-circle"></i> Vote Verified Successfully</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success">
+                    <h5><i class="bi bi-shield-check"></i> Your vote has been verified!</h5>
+                    <p class="mb-0">Your vote is securely recorded in the system and will be counted in the final tally.
+                    </p>
+                </div>
+
+                <h5>Verification Details</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <th width="30%">Election:</th>
+                                <td><strong>{{ vote.election.title }}</strong></td>
+                            </tr>
+                            <tr>
+                                <th>Vote Cast At:</th>
+                                <td>{{ vote.cast_at.strftime('%Y-%m-%d %H:%M:%S UTC') }}</td>
+                            </tr>
+                            <tr>
+                                <th>Verification Token:</th>
+                                <td><code class="verification-token">{{ token }}</code></td>
+                            </tr>
+                            <tr>
+                                <th>Vote Status:</th>
+                                <td><span class="badge bg-success">Recorded & Encrypted</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h5>Cryptographic Proof</h5>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <p class="mb-2"><strong>Digital Signature:</strong></p>
+                        <code class="d-block text-break small mb-3">{{ vote.digital_signature[:64] }}...</code>
+
+                        <p class="mb-2"><strong>Vote Hash (First 32 bytes):</strong></p>
+                        <code class="d-block text-break small">{{ vote.encrypted_vote[:64] }}...</code>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-3">
+                    <h6><i class="bi bi-info-circle"></i> What This Means</h6>
+                    <ul class="mb-0">
+                        <li><strong>Your vote is encrypted:</strong> No one can see what you voted for</li>
+                        <li><strong>Your vote is signed:</strong> Any tampering would be detected</li>
+                        <li><strong>Your vote will be counted:</strong> It will be included in the final tally</li>
+                        <li><strong>Your privacy is protected:</strong> This verification doesn't reveal your choice
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <a href="{{ url_for('voter.dashboard') }}" class="btn btn-primary">
+                        <i class="bi bi-house"></i> Return to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0"><i class="bi bi-x-circle"></i> Verification Failed</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger">
+                    <h5><i class="bi bi-exclamation-triangle"></i> Vote Not Found</h5>
+                    <p class="mb-0">No vote was found matching the provided verification token.</p>
+                </div>
+
+                <h5>Possible Reasons</h5>
+                <ul>
+                    <li><strong>Incorrect token:</strong> The verification token may have been entered incorrectly</li>
+                    <li><strong>Vote not yet processed:</strong> If you just voted, wait a moment and try again</li>
+                    <li><strong>Token expired:</strong> Some verification tokens may have time limits</li>
+                    <li><strong>Vote not cast:</strong> You may not have successfully submitted your vote</li>
+                </ul>
+
+                <h5>What to Do</h5>
+                <ol>
+                    <li>Double-check the verification token for typos</li>
+                    <li>Ensure you're verifying in the correct election</li>
+                    <li>If the problem persists, contact system administrators</li>
+                </ol>
+
+                <div class="d-grid gap-2 mt-4">
+                    <a href="{{ url_for('voter.verify_vote') }}" class="btn btn-warning">
+                        <i class="bi bi-arrow-repeat"></i> Try Again
+                    </a>
+                    <a href="{{ url_for('voter.dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-house"></i> Return to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

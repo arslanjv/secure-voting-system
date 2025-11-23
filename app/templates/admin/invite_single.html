@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Invite Single User - Admin{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-person-plus"></i> Invite Single User</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" novalidate>
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form.email.label(class="form-label") }}
+                        {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""),
+                        placeholder="user@example.com") }}
+                        {% if form.email.errors %}
+                        {% for error in form.email.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                        {% endif %}
+                        <small class="form-text text-muted">
+                            Invite email will be sent automatically to this address
+                        </small>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-clock"></i> <strong>Note:</strong> Invite tokens automatically expire after 24
+                        hours.
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-primary") }}
+                        <a href="{{ url_for('admin.list_invites') }}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-3 bg-light">
+            <div class="card-body">
+                <h6><i class="bi bi-info-circle"></i> How It Works</h6>
+                <ol class="mb-0 small">
+                    <li>Enter the email address of the person you want to invite</li>
+                    <li>System generates a unique, one-time-use registration token (expires in 24 hours)</li>
+                    <li><strong>Registration email is sent automatically</strong> with the invite link</li>
+                    <li>User clicks the link in their email and completes registration</li>
+                    <li>Token is automatically marked as used after successful registration</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

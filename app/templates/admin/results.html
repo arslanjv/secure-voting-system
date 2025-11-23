@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Election Results - Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="bi bi-bar-chart"></i> Final Results: {{ election.title }}</h4>
+                    <div>
+                        <a href="{{ url_for('admin.export_results', election_id=election.id) }}"
+                            class="btn btn-light me-2">
+                            <i class="bi bi-download"></i> Export to CSV
+                        </a>
+                        <form action="{{ url_for('admin.retally_election', election_id=election.id) }}" method="POST"
+                            class="d-inline" onsubmit="return confirm('Reset tally data and re-tally this election?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                            <button type="submit" class="btn btn-warning">
+                                <i class="bi bi-arrow-clockwise"></i> Re-Tally
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h5><i class="bi bi-check-circle"></i> Election Successfully Tallied</h5>
+                            <p class="mb-0">Results have been calculated, digitally signed, and are now publicly
+                                available.</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <p class="mb-1"><strong>Tallied At:</strong></p>
+                            <p class="mb-0">{{ election.tally_data.tallied_at if election.tally_data else 'N/A' }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary Statistics -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card text-center bg-light">
+                            <div class="card-body">
+                                <h2 class="mb-0">{{ election.tally_data.total_votes if election.tally_data else 0 }}
+                                </h2>
+                                <p class="mb-0 text-muted">Total Votes</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-light">
+                            <div class="card-body">
+                                <h2 class="mb-0">{{ election.candidates.count() }}</h2>
+                                <p class="mb-0 text-muted">Candidates</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-light">
+                            <div class="card-body">
+                                <h2 class="mb-0">{{ ((election.tally_data.total_votes / election.votes.count() * 100) if
+                                    election.votes.count() > 0 else 0) | round(1) }}%</h2>
+                                <p class="mb-0 text-muted">Turnout Rate</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-success text-white">
+                            <div class="card-body">
+                                <h5 class="mb-0"><i class="bi bi-trophy"></i> Winner</h5>
+                                <p class="mb-0">
+                                    {% if election.tally_data and election.tally_data.candidate_votes %}
+                                    {{ election.tally_data.candidate_votes|sort(attribute='votes',
+                                    reverse=True)|first|attr('name') }}
+                                    {% else %}
+                                    N/A
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Results Table -->
+                <h5>Candidate Results</h5>
+                {% if election.tally_data and election.tally_data.candidate_votes %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th width="8%">Rank</th>
+                                <th>Candidate Name</th>
+                                <th>Party</th>
+                                <th width="12%">Votes</th>
+                                <th width="12%">Percentage</th>
+                                <th width="35%">Vote Distribution</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for candidate_data in election.tally_data.candidate_votes|sort(attribute='votes',
+                            reverse=True) %}
+                            {% set total = election.tally_data.total_votes %}
+                            {% set percentage = (candidate_data.votes / total * 100) if total > 0 else 0 %}
+                            <tr {% if loop.index==1 %}class="table-success" {% endif %}>
+                                <td class="text-center">
+                                    {% if loop.index == 1 %}
+                                    <span class="badge bg-warning text-dark fs-6"><i class="bi bi-trophy-fill"></i>
+                                        1st</span>
+                                    {% elif loop.index == 2 %}
+                                    <span class="badge bg-secondary fs-6">2nd</span>
+                                    {% elif loop.index == 3 %}
+                                    <span class="badge bg-secondary fs-6">3rd</span>
+                                    {% else %}
+                                    <span class="badge bg-light text-dark">{{ loop.index }}th</span>
+                                    {% endif %}
+                                </td>
+                                <td><strong>{{ candidate_data.name }}</strong></td>
+                                <td>{{ candidate_data.party }}</td>
+                                <td class="text-center"><strong class="fs-5">{{ candidate_data.votes }}</strong></td>
+                                <td class="text-center"><strong>{{ "%.2f"|format(percentage) }}%</strong></td>
+                                <td>
+                                    <div class="progress" style="height: 30px;">
+                                        <div class="progress-bar {% if loop.index == 1 %}bg-success{% elif loop.index == 2 %}bg-info{% elif loop.index == 3 %}bg-warning{% else %}bg-secondary{% endif %}"
+                                            role="progressbar" style="width: {{ percentage }}%;"
+                                            aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                            <strong>{{ "%.1f"|format(percentage) }}%</strong>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <th colspan="3" class="text-end">Total:</th>
+                                <th class="text-center">{{ election.tally_data.total_votes }}</th>
+                                <th class="text-center">100.00%</th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> No tally data available.
+                </div>
+                {% endif %}
+
+                <!-- Digital Signature Verification -->
+                <h5 class="mt-4">Cryptographic Verification</h5>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong><i class="bi bi-shield-check"></i> Digital Signature
+                                        (Ed25519):</strong></p>
+                                <code
+                                    class="small text-break">{{ election.tally_signature[:128] if election.tally_signature else 'N/A' }}...</code>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong><i class="bi bi-person-badge"></i> Tallied By:</strong></p>
+                                <p class="mb-2">{{ election.tally_data.tallied_by if election.tally_data else 'N/A' }}
+                                </p>
+
+                                <p class="mb-1"><strong><i class="bi bi-calendar-check"></i> Tallied At:</strong></p>
+                                <p class="mb-0">{{ election.tally_data.tallied_at if election.tally_data else 'N/A' }}
+                                </p>
+                            </div>
+                        </div>
+                        <hr>
+                        <p class="mb-0 small">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Verification Status:</strong> These results have been cryptographically signed using
+                            Ed25519 digital signatures.
+                            Auditors can independently verify the signature to ensure results have not been tampered
+                            with.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-grid gap-2 mt-4">
+                    <a href="{{ url_for('admin.view_election', election_id=election.id) }}" class="btn btn-primary">
+                        <i class="bi bi-arrow-left"></i> Back to Election Details
+                    </a>
+                    <a href="{{ url_for('admin.list_elections') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-list-ul"></i> Back to Elections List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

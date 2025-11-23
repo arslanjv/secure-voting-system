@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Bulk Invite Users - Admin{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-people-fill"></i> Bulk Invite Users</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" novalidate>
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form.emails.label(class="form-label") }}
+                        {{ form.emails(class="form-control" + (" is-invalid" if form.emails.errors else ""),
+                        rows=10,
+                        placeholder="user1@example.com\nuser2@example.com\nuser3@example.com") }}
+                        {% if form.emails.errors %}
+                        {% for error in form.emails.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                        {% endif %}
+                        <small class="form-text text-muted">
+                            Enter one email address per line. Invite emails will be sent automatically to all valid
+                            addresses.
+                        </small>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-clock"></i> <strong>Note:</strong> All invite tokens will automatically expire
+                        after 24 hours.
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-primary") }}
+                        <a href="{{ url_for('admin.list_invites') }}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-3 bg-light">
+            <div class="card-body">
+                <h6><i class="bi bi-info-circle"></i> Bulk Invite Instructions</h6>
+                <ul class="mb-0 small">
+                    <li><strong>Format:</strong> Enter one email address per line in the text area above</li>
+                    <li><strong>Automatic emails:</strong> System will send registration emails automatically to all
+                        valid addresses</li>
+                    <li><strong>Validation:</strong> System automatically validates email format and checks for
+                        duplicates</li>
+                    <li><strong>Existing users:</strong> Emails already registered will be skipped automatically</li>
+                    <li><strong>Pending invites:</strong> If a valid invite already exists for an email, it will be
+                        skipped</li>
+                    <li><strong>Error handling:</strong> Any errors will be displayed after submission with details</li>
+                    <li><strong>Expiration:</strong> All tokens expire in 24 hours for security</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header bg-secondary text-white">
+                <h6 class="mb-0"><i class="bi bi-file-earmark-text"></i> CSV Upload (Future Feature)</h6>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-0">
+                    <em>CSV file upload functionality will be added in a future update. For now, please copy and paste
+                        email addresses into the text area above.</em>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

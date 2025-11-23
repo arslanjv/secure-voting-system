@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Election Details - Auditor{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="bi bi-ballot-check"></i> Election Details (Read-Only)</h4>
+                    <a href="{{ url_for('auditor.view_elections') }}" class="btn btn-light btn-sm">
+                        <i class="bi bi-arrow-left"></i> Back to Elections
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h3>{{ election.title }}</h3>
+                        <p class="lead">{{ election.description or 'No description provided.' }}</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <span class="badge 
+                            {% if election.status.value == 'draft' %}bg-secondary
+                            {% elif election.status.value == 'active' %}bg-success
+                            {% elif election.status.value == 'closed' %}bg-warning text-dark
+                            {% elif election.status.value == 'tallied' %}bg-primary
+                            {% endif %}" style="font-size: 1.2rem;">
+                            {{ election.status.value|upper }}
+                        </span>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <strong><i class="bi bi-calendar-event"></i> Start Time:</strong><br>
+                        <small>{{ election.start_time.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                    </div>
+                    <div class="col-md-3">
+                        <strong><i class="bi bi-calendar-x"></i> End Time:</strong><br>
+                        <small>{{ election.end_time.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                    </div>
+                    <div class="col-md-3">
+                        <strong><i class="bi bi-check2-square"></i> Max Selections:</strong><br>
+                        <small>{{ election.max_selections }}</small>
+                    </div>
+                    <div class="col-md-3">
+                        <strong><i class="bi bi-arrow-repeat"></i> Allow Multiple Votes:</strong><br>
+                        <small>
+                            {% if election.allow_multiple_votes %}
+                            <span class="badge bg-success">Yes</span>
+                            {% else %}
+                            <span class="badge bg-secondary">No</span>
+                            {% endif %}
+                        </small>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h2 class="text-primary">{{ vote_count }}</h2>
+                                <p class="mb-0">Total Votes Cast</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h2 class="text-success">{{ candidates|length }}</h2>
+                                <p class="mb-0">Candidates</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h2 class="text-info">{{ election.id }}</h2>
+                                <p class="mb-0">Election ID</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h5><i class="bi bi-people"></i> Candidates</h5>
+                {% if candidates %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="5%">Order</th>
+                                <th width="30%">Name</th>
+                                <th>Description</th>
+                                <th width="15%">Photo URL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for candidate in candidates %}
+                            <tr>
+                                <td>{{ candidate.order }}</td>
+                                <td><strong>{{ candidate.name }}</strong></td>
+                                <td><small>{{ candidate.description[:80] if candidate.description else 'No description'
+                                        }}{% if candidate.description and candidate.description|length > 80 %}...{%
+                                        endif %}</small></td>
+                                <td>
+                                    {% if candidate.photo_url %}
+                                    <small class="text-truncate d-block" style="max-width: 150px;">{{
+                                        candidate.photo_url }}</small>
+                                    {% else %}
+                                    <small class="text-muted">None</small>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    No candidates have been added to this election yet.
+                </div>
+                {% endif %}
+
+                {% if election.status.value == 'tallied' and election.tallied_at %}
+                <hr>
+                <div class="alert alert-primary">
+                    <strong><i class="bi bi-calculator"></i> Tallied:</strong> {{ election.tallied_at.strftime('%Y-%m-%d
+                    %H:%M:%S') }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mt-3 bg-light">
+            <div class="card-body">
+                <h6><i class="bi bi-info-circle"></i> Auditor Information</h6>
+                <ul class="mb-0 small">
+                    <li>As an auditor, you have read-only access to all election data</li>
+                    <li>You cannot modify elections, candidates, or votes</li>
+                    <li>All vote data is encrypted to preserve voter anonymity</li>
+                    <li>View audit logs for detailed activity history on this election</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

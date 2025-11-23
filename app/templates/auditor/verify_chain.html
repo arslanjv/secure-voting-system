@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Verify Chain Integrity - Auditor{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card">
+            <div
+                class="card-header {% if verification_result and verification_result.is_valid %}bg-success{% else %}bg-danger{% endif %} text-white">
+                <h4 class="mb-0"><i class="bi bi-shield-check"></i> Audit Log Chain Verification</h4>
+            </div>
+            <div class="card-body">
+                {% if verification_result %}
+                {% if verification_result.is_valid %}
+                <div class="alert alert-success">
+                    <h5><i class="bi bi-check-circle"></i> Chain Integrity Verified</h5>
+                    <p class="mb-0">
+                        The audit log chain is intact. All {{ verification_result.total_entries }} entries have been
+                        verified successfully.
+                        No tampering or modifications detected.
+                    </p>
+                </div>
+                {% else %}
+                <div class="alert alert-danger">
+                    <h5><i class="bi bi-exclamation-triangle"></i> Chain Integrity Compromised!</h5>
+                    <p class="mb-0">
+                        <strong>WARNING:</strong> Tampering detected in the audit log chain!
+                        {{ verification_result.invalid_entries|length }} entry/entries failed verification.
+                    </p>
+                </div>
+                {% endif %}
+
+                <h5>Verification Summary</h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div
+                            class="card text-center {% if verification_result.is_valid %}bg-success text-white{% else %}bg-light{% endif %}">
+                            <div class="card-body">
+                                <h3 class="mb-0">{{ verification_result.total_entries }}</h3>
+                                <small>Total Entries</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center bg-success text-white">
+                            <div class="card-body">
+                                <h3 class="mb-0">{{ verification_result.valid_entries }}</h3>
+                                <small>Valid Entries</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div
+                            class="card text-center {% if verification_result.invalid_entries|length > 0 %}bg-danger text-white{% else %}bg-light{% endif %}">
+                            <div class="card-body">
+                                <h3 class="mb-0">{{ verification_result.invalid_entries|length }}</h3>
+                                <small>Invalid Entries</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h5 class="mt-4">Verification Details</h5>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <p class="mb-1"><strong>Verification Performed:</strong> {{ verification_result.timestamp }}</p>
+                        <p class="mb-1"><strong>Performed By:</strong> {{ current_user.username }}</p>
+                        <p class="mb-1"><strong>First Entry ID:</strong> {{ verification_result.first_entry_id }}</p>
+                        <p class="mb-0"><strong>Last Entry ID:</strong> {{ verification_result.last_entry_id }}</p>
+                    </div>
+                </div>
+
+                {% if not verification_result.is_valid and verification_result.invalid_entries %}
+                <h5 class="mt-4 text-danger">Invalid Entries Detected</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-danger">
+                        <thead>
+                            <tr>
+                                <th>Entry ID</th>
+                                <th>Timestamp</th>
+                                <th>Error Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in verification_result.invalid_entries %}
+                            <tr>
+                                <td>{{ entry.id }}</td>
+                                <td>{{ entry.timestamp }}</td>
+                                <td><span class="badge bg-danger">{{ entry.error_type }}</span></td>
+                                <td>{{ entry.description }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="alert alert-warning mt-3">
+                    <h6><i class="bi bi-exclamation-triangle"></i> Recommended Actions:</h6>
+                    <ul class="mb-0">
+                        <li>Document these findings immediately</li>
+                        <li>Notify system administrators</li>
+                        <li>Investigate the source of tampering</li>
+                        <li>Review security logs and access controls</li>
+                        <li>Consider forensic analysis if necessary</li>
+                    </ul>
+                </div>
+                {% endif %}
+
+                <h5 class="mt-4">Verification Method</h5>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <p>The verification process checks:</p>
+                        <ol class="mb-0">
+                            <li><strong>Hash Chain Continuity:</strong> Each entry's <code>previous_hash</code> matches
+                                the previous entry's <code>entry_hash</code></li>
+                            <li><strong>Entry Hash Validity:</strong> SHA-256 hash of entry data matches the stored
+                                <code>entry_hash</code></li>
+                            <li><strong>Digital Signature:</strong> Ed25519 signature verification for each entry</li>
+                            <li><strong>Chronological Order:</strong> Timestamps are in sequential order</li>
+                        </ol>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <p><i class="bi bi-info-circle"></i> Click the button below to verify the integrity of the entire
+                        audit log chain.</p>
+                    <p class="mb-0">This process will:</p>
+                    <ul class="mb-0">
+                        <li>Check all audit log entries for tampering</li>
+                        <li>Verify cryptographic hashes and signatures</li>
+                        <li>Validate the blockchain-style chain structure</li>
+                        <li>Report any inconsistencies or violations</li>
+                    </ul>
+                </div>
+
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-warning btn-lg">
+                            <i class="bi bi-shield-check"></i> Start Chain Verification
+                        </button>
+                    </div>
+                </form>
+                {% endif %}
+
+                <div class="d-grid gap-2 mt-4">
+                    {% if verification_result %}
+                    <a href="{{ url_for('auditor.verify_chain') }}" class="btn btn-outline-warning">
+                        <i class="bi bi-arrow-repeat"></i> Run Verification Again
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('auditor.dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

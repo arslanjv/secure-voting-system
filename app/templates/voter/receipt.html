@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Vote Receipt{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="bi bi-check-circle"></i> Vote Submitted Successfully!</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <strong>Your vote has been encrypted and recorded securely.</strong>
+                </div>
+
+                <h5>Election: {{ election.title }}</h5>
+                <p class="text-muted">Cast at: {{ vote.cast_at.strftime('%Y-%m-%d %H:%M:%S UTC') }}</p>
+
+                <hr>
+
+                <h5><i class="bi bi-key"></i> Your Verification Token</h5>
+                <p>Save this token to verify your vote later. You can check that your vote was recorded correctly
+                    without revealing your choice.</p>
+
+                <div class="verification-token">
+                    <code>{{ vote.verification_token }}</code>
+                </div>
+
+                <button class="btn btn-outline-secondary mt-2" id="copyTokenBtn">
+                    <i class="bi bi-clipboard"></i> Copy Token
+                </button>
+
+                <hr>
+
+                <h6>What happens next?</h6>
+                <ul>
+                    <li>Your encrypted vote is stored securely in our database</li>
+                    <li>Only authorized election officials can decrypt and tally votes</li>
+                    <li>You can verify your vote was recorded using the token above</li>
+                    <li>Results will be published after the election closes and is tallied</li>
+                </ul>
+
+                <div class="d-grid gap-2 mt-4">
+                    <a href="{{ url_for('voter.verify_vote') }}" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Verify My Vote Now
+                    </a>
+                    <a href="{{ url_for('voter.dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-house"></i> Return to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3 bg-light">
+            <div class="card-body">
+                <h6><i class="bi bi-shield-lock"></i> Security & Privacy</h6>
+                <ul class="small mb-0">
+                    <li>Your vote is encrypted with AES-256-GCM and digitally signed</li>
+                    <li>Your identity is not linked to your encrypted ballot</li>
+                    <li>The verification token allows you to confirm your vote without revealing your choice</li>
+                    <li>All actions are logged in our immutable audit trail</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script nonce="{{ csp_nonce() }}">
+    document.getElementById('copyTokenBtn').addEventListener('click', function () {
+        const token = '{{ vote.verification_token }}';
+        navigator.clipboard.writeText(token).then(() => {
+            alert('Verification token copied to clipboard!');
+        }).catch(() => {
+            alert('Failed to copy token. Please copy it manually.');
+        });
+    });
+</script>
+{% endblock %}

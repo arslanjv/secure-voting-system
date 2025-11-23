@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Audit Logs - Auditor{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="bi bi-file-text"></i> Audit Logs</h4>
+                    <div>
+                        <a href="{{ url_for('auditor.verify_chain') }}" class="btn btn-warning me-2">
+                            <i class="bi bi-shield-check"></i> Verify Chain Integrity
+                        </a>
+                        <a href="{{ url_for('auditor.export_logs') }}" class="btn btn-light">
+                            <i class="bi bi-download"></i> Export Logs
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Filters -->
+                <form method="GET" class="row g-3 mb-4 bg-light p-3 rounded">
+                    <div class="col-md-3">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" name="start_date" class="form-control"
+                            value="{{ request.args.get('start_date', '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">End Date</label>
+                        <input type="date" name="end_date" class="form-control"
+                            value="{{ request.args.get('end_date', '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">User</label>
+                        <input type="text" name="user" class="form-control" placeholder="Username"
+                            value="{{ request.args.get('user', '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Action</label>
+                        <input type="text" name="action" class="form-control" placeholder="Action type"
+                            value="{{ request.args.get('action', '') }}">
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i> Apply Filters
+                        </button>
+                        <a href="{{ url_for('auditor.view_logs') }}" class="btn btn-outline-secondary">
+                            Clear Filters
+                        </a>
+                    </div>
+                </form>
+
+                {% if logs.items %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm">
+                        <thead class="table-dark">
+                            <tr>
+                                <th width="5%">ID</th>
+                                <th width="15%">Timestamp</th>
+                                <th width="12%">User</th>
+                                <th width="15%">Action</th>
+                                <th>Details</th>
+                                <th width="8%">IP Address</th>
+                                <th width="5%">View</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in logs.items %}
+                            <tr>
+                                <td>{{ log.id }}</td>
+                                <td><small>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small></td>
+                                <td>{{ log.user }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if 'login' in log.action.lower() %}bg-success
+                                        {% elif 'vote' in log.action.lower() %}bg-primary
+                                        {% elif 'tally' in log.action.lower() %}bg-warning text-dark
+                                        {% elif 'fail' in log.action.lower() or 'error' in log.action.lower() %}bg-danger
+                                        {% else %}bg-secondary{% endif %}">
+                                        {{ log.action }}
+                                    </span>
+                                </td>
+                                <td><small>{{ log.description[:80] if log.description else 'N/A' }}{% if log.description
+                                        and log.description|length > 80 %}...{% endif %}</small>
+                                </td>
+                                <td><small>{{ log.ip_address }}</small></td>
+                                <td>
+                                    <a href="{{ url_for('auditor.view_log_detail', log_id=log.id) }}"
+                                        class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <nav aria-label="Audit log pagination">
+                    <ul class="pagination justify-content-center">
+                        {% if logs.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="{{ url_for('auditor.view_logs', page=logs.prev_num, action=action_filter, severity=severity_filter, user=user_filter) }}">Previous</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Previous</span>
+                        </li>
+                        {% endif %}
+
+                        {% for page_num in logs.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2)
+                        %}
+                        {% if page_num %}
+                        <li class="page-item {% if page_num == logs.page %}active{% endif %}">
+                            <a class="page-link"
+                                href="{{ url_for('auditor.view_logs', page=page_num, action=action_filter, severity=severity_filter, user=user_filter) }}">{{
+                                page_num
+                                }}</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if logs.has_next %}
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="{{ url_for('auditor.view_logs', page=logs.next_num, action=action_filter, severity=severity_filter, user=user_filter) }}">Next</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Next</span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+
+                <p class="text-center text-muted">
+                    Showing {{ logs.items|length }} of {{ logs.total }} logs (Page {{ logs.page }} of {{ logs.pages }})
+                </p>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    No audit logs found matching the current filters.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mt-3 bg-light">
+            <div class="card-body">
+                <h6><i class="bi bi-info-circle"></i> Audit Log Information</h6>
+                <ul class="mb-0 small">
+                    <li>All system actions are logged with blockchain-style cryptographic chaining</li>
+                    <li>Each log entry contains a hash of the previous entry, creating an immutable audit trail</li>
+                    <li>Any tampering with logs will break the cryptographic chain</li>
+                    <li>Use "Verify Chain Integrity" to validate the entire audit log chain</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

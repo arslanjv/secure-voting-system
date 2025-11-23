@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Voter Dashboard{% endblock %}
+
+{% block content %}
+<h2><i class="bi bi-speedometer2"></i> Voter Dashboard</h2>
+<p class="lead">Welcome, {{ current_user.username }}!</p>
+
+<hr>
+
+<!-- Active Elections -->
+<h3 class="mt-4"><i class="bi bi-calendar-event"></i> Active Elections</h3>
+{% if active_elections %}
+<div class="row">
+    {% for election in active_elections %}
+    <div class="col-md-6 mb-3">
+        <div class="card election-card">
+            <div class="card-body">
+                <h5 class="card-title">{{ election.title }}</h5>
+                <p class="card-text">{{ election.description[:150] }}...</p>
+
+                <div class="mb-2">
+                    <small class="text-muted">
+                        <i class="bi bi-clock"></i> Ends: {{ election.end_time.strftime('%Y-%m-%d %H:%M') }}
+                    </small>
+                </div>
+
+                {% if election.id in voted_election_ids %}
+                <span class="badge bg-success">
+                    <i class="bi bi-check-circle"></i> Voted
+                </span>
+                <a href="{{ url_for('voter.view_election', election_id=election.id) }}"
+                    class="btn btn-sm btn-outline-primary">
+                    View Details
+                </a>
+                {% else %}
+                <a href="{{ url_for('voter.cast_vote', election_id=election.id) }}" class="btn btn-success">
+                    <i class="bi bi-box-arrow-in-right"></i> Cast Vote
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> No active elections at this time.
+</div>
+{% endif %}
+
+<!-- Upcoming Elections -->
+{% if upcoming_elections %}
+<h3 class="mt-4"><i class="bi bi-calendar-plus"></i> Upcoming Elections</h3>
+<div class="list-group">
+    {% for election in upcoming_elections %}
+    <div class="list-group-item">
+        <h6 class="mb-1">{{ election.title }}</h6>
+        <small class="text-muted">
+            <i class="bi bi-clock"></i> Starts: {{ election.start_time.strftime('%Y-%m-%d %H:%M') }}
+        </small>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Past Elections -->
+{% if past_elections %}
+<h3 class="mt-4"><i class="bi bi-archive"></i> Past Elections & Results</h3>
+<div class="list-group">
+    {% for election in past_elections %}
+    <a href="{{ url_for('voter.view_results', election_id=election.id) }}"
+        class="list-group-item list-group-item-action">
+        <h6 class="mb-1">{{ election.title }}</h6>
+        <small class="text-muted">
+            <i class="bi bi-check-circle"></i> Tallied: {{ election.tallied_at.strftime('%Y-%m-%d %H:%M') if
+            election.tallied_at else 'N/A' }}
+        </small>
+    </a>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Verification Section -->
+<div class="card mt-4 bg-light">
+    <div class="card-body">
+        <h5><i class="bi bi-check-circle"></i> Verify Your Vote</h5>
+        <p>You can verify that your vote was recorded correctly using your verification token.</p>
+        <a href="{{ url_for('voter.verify_vote') }}" class="btn btn-outline-primary">
+            <i class="bi bi-search"></i> Verify a Vote
+        </a>
+    </div>
+</div>
+{% endblock %}

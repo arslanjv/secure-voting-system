@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Verify Vote{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-check-circle"></i> Verify Your Vote</h4>
+            </div>
+            <div class="card-body">
+                <p class="lead">
+                    Enter your verification token to confirm that your vote was recorded correctly.
+                </p>
+
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    This verification confirms your vote was recorded, but does not reveal how you voted.
+                </div>
+
+                <form method="POST" action="{{ url_for('voter.verify_vote') }}">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form.verification_token.label(class="form-label") }}
+                        {{ form.verification_token(class="form-control form-control-lg" + (" is-invalid" if
+                        form.verification_token.errors else ""),
+                        placeholder="Paste your verification token here") }}
+                        {% if form.verification_token.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.verification_token.errors[0] }}
+                        </div>
+                        {% endif %}
+                        <small class="form-text text-muted">
+                            The token was provided to you after casting your vote.
+                        </small>
+                    </div>
+
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
+                    </div>
+                </form>
+
+                <hr>
+
+                <h6>How Verification Works</h6>
+                <ol class="small">
+                    <li>Each vote is assigned a unique verification token</li>
+                    <li>The token is cryptographically linked to your encrypted vote</li>
+                    <li>You can use the token to confirm your vote exists in the system</li>
+                    <li>No one can determine how you voted from the token alone</li>
+                    <li>This provides individual verifiability without compromising privacy</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

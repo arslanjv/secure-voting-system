@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Tally Election - Admin{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0"><i class="bi bi-calculator"></i> Tally Election Results</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger">
+                    <h5><i class="bi bi-exclamation-triangle"></i> Critical Security Action</h5>
+                    <p class="mb-0">
+                        <strong>WARNING:</strong> This action will decrypt all votes and calculate final results.
+                        This operation is irreversible and will be logged in the audit trail.
+                    </p>
+                </div>
+
+                <h5>Election Information</h5>
+                <div class="card bg-light mb-3">
+                    <div class="card-body">
+                        <p class="mb-1"><strong>Title:</strong> {{ election.title }}</p>
+                        <p class="mb-1"><strong>Description:</strong> {{ election.description }}</p>
+                        <p class="mb-1"><strong>Total Votes:</strong> {{ election.votes.count() }}</p>
+                        <p class="mb-1"><strong>Total Candidates:</strong> {{ election.candidates.count() }}</p>
+                        <p class="mb-0"><strong>Status:</strong> <span class="badge bg-warning text-dark">{{
+                                election.status.value.title() }}</span></p>
+                    </div>
+                </div>
+
+                <h5>Security Requirements</h5>
+                <p>To proceed with tallying, you must re-authenticate:</p>
+
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form.admin_password.label(class="form-label") }}
+                        {{ form.admin_password(class="form-control form-control-lg" + (" is-invalid" if
+                        form.admin_password.errors
+                        else ""),
+                        placeholder="Enter your administrator password", autofocus=true) }}
+                        {% if form.admin_password.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.admin_password.errors[0] }}
+                        </div>
+                        {% endif %}
+                        <small class="text-muted">Your password is required to decrypt the encryption keys</small>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-info-circle"></i> What Will Happen:</h6>
+                        <ol class="mb-0">
+                            <li>Your password will be verified</li>
+                            <li>Election encryption keys will be retrieved</li>
+                            <li>Each vote will be decrypted using AES-256-GCM</li>
+                            <li>Votes will be tallied per candidate</li>
+                            <li>Results will be digitally signed with Ed25519</li>
+                            <li>Final results will be published</li>
+                            <li>All actions will be recorded in audit logs</li>
+                        </ol>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        {{ form.confirm(class="form-check-input", id="confirmTally") }}
+                        {{ form.confirm.label(class="form-check-label", for="confirmTally") }}
+                        {% if form.confirm.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.confirm.errors[0] }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-warning btn-lg", id="tallyButton") }}
+                        <a href="{{ url_for('admin.view_election', election_id=election.id) }}"
+                            class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-3 bg-light">
+            <div class="card-body">
+                <h6><i class="bi bi-shield-lock"></i> Security Notice</h6>
+                <p class="mb-0 small">
+                    The tallying process uses secure cryptographic operations to decrypt votes. Your password is never
+                    stored or logged.
+                    All tallying operations are recorded in the audit trail with digital signatures for verification by
+                    auditors.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

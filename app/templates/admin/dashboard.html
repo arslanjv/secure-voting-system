@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<h2><i class="bi bi-gear"></i> Admin Dashboard</h2>
+<p class="lead">Welcome, {{ current_user.username }}!</p>
+
+<hr>
+
+<!-- Statistics -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h3>{{ total_elections }}</h3>
+                <p class="mb-0"><i class="bi bi-calendar-event"></i> Total Elections</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h3>{{ active_elections }}</h3>
+                <p class="mb-0"><i class="bi bi-play-circle"></i> Active Elections</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h3>{{ total_users }}</h3>
+                <p class="mb-0"><i class="bi bi-people"></i> Registered Users</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <h3>{{ total_votes }}</h3>
+                <p class="mb-0"><i class="bi bi-ballot"></i> Total Votes Cast</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-lightning"></i> Quick Actions</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3 mb-2">
+                <a href="{{ url_for('admin.create_election') }}" class="btn btn-primary w-100">
+                    <i class="bi bi-plus-circle"></i> Create New Election
+                </a>
+            </div>
+            <div class="col-md-3 mb-2">
+                <a href="{{ url_for('admin.invite_single') }}" class="btn btn-success w-100">
+                    <i class="bi bi-envelope-check"></i> Invite User
+                </a>
+            </div>
+            <div class="col-md-3 mb-2">
+                <a href="{{ url_for('admin.list_invites') }}" class="btn btn-info w-100">
+                    <i class="bi bi-list-check"></i> Manage Invites
+                </a>
+            </div>
+            <div class="col-md-3 mb-2">
+                <a href="{{ url_for('admin.list_elections') }}" class="btn btn-secondary w-100">
+                    <i class="bi bi-calendar-event"></i> View Elections
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Elections -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-calendar-event"></i> Recent Elections</h5>
+    </div>
+    <div class="card-body">
+        {% if recent_elections %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for election in recent_elections %}
+                    <tr>
+                        <td>{{ election.title }}</td>
+                        <td>
+                            {% if election.status.value == 'draft' %}
+                            <span class="badge bg-secondary">Draft</span>
+                            {% elif election.status.value == 'active' %}
+                            <span class="badge bg-success">Active</span>
+                            {% elif election.status.value == 'closed' %}
+                            <span class="badge bg-warning">Closed</span>
+                            {% elif election.status.value == 'tallied' %}
+                            <span class="badge bg-primary">Tallied</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ election.start_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>{{ election.end_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            <a href="{{ url_for('admin.view_election', election_id=election.id) }}"
+                                class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No elections yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Recent Audit Logs -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-file-text"></i> Recent Audit Logs</h5>
+    </div>
+    <div class="card-body">
+        {% if recent_logs %}
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Severity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in recent_logs %}
+                    <tr>
+                        <td><small>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small></td>
+                        <td><small>{{ log.username }}</small></td>
+                        <td><small>{{ log.action }}</small></td>
+                        <td>
+                            {% if log.severity == 'CRITICAL' %}
+                            <span class="badge bg-danger">{{ log.severity }}</span>
+                            {% elif log.severity == 'WARNING' %}
+                            <span class="badge bg-warning text-dark">{{ log.severity }}</span>
+                            {% else %}
+                            <span class="badge bg-info">{{ log.severity }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No audit logs yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

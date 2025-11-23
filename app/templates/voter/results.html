@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}{{ election.title }} - Results{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-bar-chart"></i> Election Results: {{ election.title }}</h4>
+            </div>
+            <div class="card-body">
+                {% if election.status.value == 'tallied' %}
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle"></i>
+                    <strong>Final Results:</strong> This election has been officially tallied and the results are now
+                    public.
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted mb-1">Total Votes Cast</h6>
+                                <h2 class="mb-0">{{ election.tally_data.total_votes if election.tally_data else 0 }}
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted mb-1">Total Candidates</h6>
+                                <h2 class="mb-0">{{ election.candidates.count() }}</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted mb-1">Tallied On</h6>
+                                <p class="mb-0">{{ election.tally_data.tallied_at if election.tally_data and
+                                    election.tally_data.tallied_at else 'N/A' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h5>Candidate Results</h5>
+                {% if election.tally_data and election.tally_data.candidate_votes %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Rank</th>
+                                <th>Candidate</th>
+                                <th>Party/Affiliation</th>
+                                <th>Votes</th>
+                                <th>Percentage</th>
+                                <th width="30%">Vote Distribution</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for candidate_data in election.tally_data.candidate_votes|sort(attribute='votes',
+                            reverse=True) %}
+                            {% set total = election.tally_data.total_votes %}
+                            {% set percentage = (candidate_data.votes / total * 100) if total > 0 else 0 %}
+                            <tr>
+                                <td>
+                                    {% if loop.index == 1 %}
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-trophy"></i> 1st</span>
+                                    {% elif loop.index == 2 %}
+                                    <span class="badge bg-secondary">2nd</span>
+                                    {% elif loop.index == 3 %}
+                                    <span class="badge bg-secondary">3rd</span>
+                                    {% else %}
+                                    <span class="badge bg-light text-dark">{{ loop.index }}th</span>
+                                    {% endif %}
+                                </td>
+                                <td><strong>{{ candidate_data.name }}</strong></td>
+                                <td>{{ candidate_data.party }}</td>
+                                <td><strong>{{ candidate_data.votes }}</strong></td>
+                                <td>{{ "%.2f"|format(percentage) }}%</td>
+                                <td>
+                                    <div class="progress" style="height: 25px;">
+                                        <div class="progress-bar {% if loop.index == 1 %}bg-success{% elif loop.index == 2 %}bg-info{% else %}bg-secondary{% endif %}"
+                                            role="progressbar" style="width: {{ percentage }}%;"
+                                            aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                            {{ "%.1f"|format(percentage) }}%
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    No candidate vote data available.
+                </div>
+                {% endif %}
+
+                <h5 class="mt-4">Verification Information</h5>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Results Signature:</strong></p>
+                                <code
+                                    class="small text-break">{{ election.tally_signature[:64] if election.tally_signature else 'N/A' }}...</code>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Tallied By:</strong></p>
+                                <p>{{ election.tally_data.tallied_by if election.tally_data and
+                                    election.tally_data.tallied_by else 'N/A' }}</p>
+
+                                <p class="mb-1"><strong>Verification Status:</strong></p>
+                                <span class="badge bg-success"><i class="bi bi-shield-check"></i> Cryptographically
+                                    Signed</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-clock-history"></i>
+                    <strong>Results Not Yet Available:</strong> This election is {{ election.status.value }}. Results
+                    will be published after official tallying.
+                </div>
+
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h6>Election Timeline</h6>
+                        <ul class="mb-0">
+                            <li><strong>Start Date:</strong> {{ election.start_time.strftime('%Y-%m-%d %H:%M') }}</li>
+                            <li><strong>End Date:</strong> {{ election.end_time.strftime('%Y-%m-%d %H:%M') }}</li>
+                            <li><strong>Current Status:</strong> <span class="badge bg-info">{{
+                                    election.status.value.title() }}</span></li>
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="d-grid gap-2 mt-4">
+                    <a href="{{ url_for('voter.dashboard') }}" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

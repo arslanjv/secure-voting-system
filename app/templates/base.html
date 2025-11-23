@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Secure Online Voting System - Cast your vote securely">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{% block title %}Secure Voting System{% endblock %}</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --dark-color: #212529;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #f8f9fa;
+        }
+
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem 0;
+        }
+
+        .footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 2rem 0;
+            margin-top: auto;
+        }
+
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        .btn-secure {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+        }
+
+        .btn-secure:hover {
+            background-color: #146c43;
+            color: white;
+        }
+
+        .alert-dismissible {
+            padding-right: 3rem;
+        }
+
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            background-color: #d4edda;
+            color: #155724;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+        }
+
+        .security-badge i {
+            margin-right: 0.25rem;
+        }
+
+        .election-card {
+            transition: transform 0.2s;
+        }
+
+        .election-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .status-badge {
+            font-weight: 600;
+            padding: 0.35rem 0.65rem;
+        }
+
+        .verification-token {
+            font-family: 'Courier New', monospace;
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            word-break: break-all;
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">
+                <i class="bi bi-shield-check"></i> Secure Voting System
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                    {% if current_user.has_role('voter') %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('voter.dashboard') }}">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('voter.verify_vote') }}">
+                            <i class="bi bi-check-circle"></i> Verify Vote
+                        </a>
+                    </li>
+                    {% elif current_user.has_role('administrator') %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
+                            <i class="bi bi-gear"></i> Admin Panel
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.list_elections') }}">
+                            <i class="bi bi-calendar-event"></i> Elections
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.list_users') }}">
+                            <i class="bi bi-people"></i> Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.list_invites') }}">
+                            <i class="bi bi-envelope-check"></i> Invites
+                        </a>
+                    </li>
+                    {% elif current_user.has_role('auditor') %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auditor.dashboard') }}">
+                            <i class="bi bi-clipboard-data"></i> Audit Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auditor.view_logs') }}">
+                            <i class="bi bi-file-text"></i> Audit Logs
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                            data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i> {{ current_user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">
+                                    <i class="bi bi-person"></i> Profile
+                                </a></li>
+                            {% if not current_user.is_2fa_enabled %}
+                            <li><a class="dropdown-item" href="{{ url_for('auth.setup_2fa') }}">
+                                    <i class="bi bi-shield-lock"></i> Enable 2FA
+                                </a></li>
+                            {% endif %}
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                </a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.about') }}">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.security') }}">Security</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.login') }}">
+                            <i class="bi bi-box-arrow-in-right"></i> Login
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.register') }}">
+                            <i class="bi bi-person-plus"></i> Register
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="container mt-3">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show"
+            role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="bi bi-shield-check"></i> Secure Voting System</h5>
+                    <p class="text-muted">
+                        End-to-end encrypted voting platform with cryptographic verification.
+                    </p>
+                    <div class="security-badge bg-success text-white">
+                        <i class="bi bi-lock-fill"></i> TLS 1.3 Encrypted
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <h6>Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('main.about') }}" class="text-white-50">About</a></li>
+                        <li><a href="{{ url_for('main.security') }}" class="text-white-50">Security</a></li>
+                        <li><a href="{{ url_for('main.help') }}" class="text-white-50">Help</a></li>
+                        <li><a href="{{ url_for('voter.verify_vote') }}" class="text-white-50">Verify Vote</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6>Security Features</h6>
+                    <ul class="list-unstyled text-white-50">
+                        <li><i class="bi bi-check-circle"></i> AES-256-GCM Encryption</li>
+                        <li><i class="bi bi-check-circle"></i> Ed25519 Signatures</li>
+                        <li><i class="bi bi-check-circle"></i> Two-Factor Auth</li>
+                        <li><i class="bi bi-check-circle"></i> Immutable Audit Logs</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="bg-white">
+            <div class="text-center text-white-50">
+                <p>&copy; 2025 Secure Voting System. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

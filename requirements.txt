@@ -1,0 +1,52 @@
+# Core Flask Framework
+Flask==3.0.0
+Werkzeug==3.0.1
+
+# Database
+Flask-SQLAlchemy==3.1.1
+SQLAlchemy==2.0.23
+psycopg2-binary==2.9.9
+PyMySQL==1.1.0
+
+# Authentication & Session Management
+Flask-Login==0.6.3
+Flask-WTF==1.2.1
+WTForms==3.1.1
+
+# Password Hashing (Argon2)
+argon2-cffi==23.1.0
+
+# Two-Factor Authentication (TOTP)
+pyotp==2.9.0
+qrcode==7.4.2
+Pillow==10.1.0
+
+# Cryptography
+pycryptodome==3.19.0
+cryptography==41.0.7
+
+# Security Headers & CSRF
+Flask-Talisman==1.1.0
+
+# Rate Limiting
+Flask-Limiter==3.5.0
+redis==5.0.1
+
+# Input Validation & Sanitization
+bleach==6.1.0
+email-validator==2.1.0
+
+# Environment Variables
+python-dotenv==1.0.0
+
+# Date & Time
+python-dateutil==2.8.2
+
+# Static Analysis (Development)
+bandit==1.7.5
+
+# WSGI Server (Production)
+gunicorn==21.2.0
+
+# Additional Security
+itsdangerous==2.1.2

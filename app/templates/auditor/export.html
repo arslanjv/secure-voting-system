@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Export Audit Logs - Auditor{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0"><i class="bi bi-download"></i> Export Audit Logs</h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">
+                    Export audit logs as CSV for external analysis, compliance reporting, or archival purposes.
+                    Use the filters below to narrow down the export to specific time periods or actions.
+                </p>
+
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.start_date.label(class="form-label") }}
+                            {{ form.start_date(class="form-control" + (" is-invalid" if form.start_date.errors else ""))
+                            }}
+                            {% if form.start_date.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.start_date.errors[0] }}
+                            </div>
+                            {% endif %}
+                            <small class="text-muted">Optional: Filter logs from this date/time onwards</small>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            {{ form.end_date.label(class="form-label") }}
+                            {{ form.end_date(class="form-control" + (" is-invalid" if form.end_date.errors else "")) }}
+                            {% if form.end_date.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.end_date.errors[0] }}
+                            </div>
+                            {% endif %}
+                            <small class="text-muted">Optional: Filter logs up to this date/time</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.action_filter.label(class="form-label") }}
+                        {{ form.action_filter(class="form-control" + (" is-invalid" if form.action_filter.errors else
+                        ""),
+                        placeholder="e.g., LOGIN, VOTE, TALLY") }}
+                        {% if form.action_filter.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.action_filter.errors[0] }}
+                        </div>
+                        {% endif %}
+                        <small class="text-muted">Optional: Filter by specific action type</small>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Note:</strong> Large exports may take some time to generate. The CSV file will include
+                        all audit log details including timestamps, users, actions, and cryptographic hashes for chain
+                        verification.
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-info btn-lg") }}
+                        <a href="{{ url_for('auditor.view_logs') }}" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-3 bg-light">
+            <div class="card-body">
+                <h6><i class="bi bi-info-circle"></i> Export Information</h6>
+                <ul class="mb-0 small">
+                    <li>Exported files are in CSV format compatible with Excel and other analysis tools</li>
+                    <li>Each row contains complete audit log information including cryptographic hashes</li>
+                    <li>Use the hash chain to verify integrity of exported logs</li>
+                    <li>Exports include all non-sensitive data; sensitive information is not included</li>
+                    <li>File naming format: audit_logs_YYYYMMDD_HHMMSS.csv</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

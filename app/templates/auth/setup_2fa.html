@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Setup Two-Factor Authentication{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="bi bi-shield-plus"></i> Setup Two-Factor Authentication</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    Two-factor authentication adds an extra layer of security to your account.
+                </div>
+
+                <h5>Step 1: Install Authenticator App</h5>
+                <p>Download one of these apps on your mobile device:</p>
+                <ul>
+                    <li>Google Authenticator (iOS/Android)</li>
+                    <li>Microsoft Authenticator (iOS/Android)</li>
+                    <li>Authy (iOS/Android)</li>
+                    <li>FreeOTP (iOS/Android)</li>
+                </ul>
+
+                <hr>
+
+                <h5>Step 2: Scan QR Code</h5>
+                <p>Open your authenticator app and scan this QR code:</p>
+
+                <div class="text-center mb-3">
+                    <img src="data:image/png;base64,{{ qr_code }}" alt="2FA QR Code" class="img-fluid"
+                        style="max-width: 300px;">
+                </div>
+
+                <div class="alert alert-secondary">
+                    <p class="mb-1"><strong>Can't scan? Enter this code manually:</strong></p>
+                    <code class="user-select-all">{{ secret }}</code>
+                </div>
+
+                <hr>
+
+                <h5>Step 3: Verify Code</h5>
+                <p>Enter the 6-digit code from your authenticator app to complete setup:</p>
+
+                <form method="POST" action="{{ url_for('auth.setup_2fa') }}">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form.token.label(class="form-label") }}
+                        {{ form.token(class="form-control form-control-lg text-center" + (" is-invalid" if
+                        form.token.errors else ""),
+                        placeholder="000000", maxlength="6", autocomplete="off", autofocus=true) }}
+                        {% if form.token.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.token.errors[0] }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-success btn-lg") }}
+                        <a href="{{ url_for('auth.profile') }}" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-3 bg-light">
+            <div class="card-body">
+                <h6><i class="bi bi-shield-check"></i> Security Tips</h6>
+                <ul class="small mb-0">
+                    <li>Save your secret key in a secure location</li>
+                    <li>Don't share your 2FA codes with anyone</li>
+                    <li>Keep your authenticator app up to date</li>
+                    <li>Consider keeping backup codes in a safe place</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit Candidate' if candidate else 'Add Candidate' }} - Admin{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-{{ 'pencil' if candidate else 'plus-circle' }}"></i>
+                    {{ 'Edit Candidate' if candidate else 'Add Candidate to Election' }}
+                </h4>
+            </div>
+            <div class="card-body">
+                {% if election %}
+                <div class="alert alert-info">
+                    <strong>Election:</strong> {{ election.title }}
+                </div>
+                {% endif %}
+
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else ""),
+                        placeholder="Full name of the candidate") }}
+                        {% if form.name.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.name.errors[0] }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label") }}
+                        {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""),
+                        rows=5, placeholder="Brief biography, qualifications, and platform") }}
+                        {% if form.description.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.description.errors[0] }}
+                        </div>
+                        {% endif %}
+                        <small class="text-muted">Provide information to help voters make informed decisions</small>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.photo_url.label(class="form-label") }}
+                        {{ form.photo_url(class="form-control" + (" is-invalid" if form.photo_url.errors else ""),
+                        placeholder="https://example.com/photo.jpg (optional)") }}
+                        {% if form.photo_url.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.photo_url.errors[0] }}
+                        </div>
+                        {% endif %}
+                        <small class="text-muted">Optional URL to candidate photo</small>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.order.label(class="form-label") }}
+                        {{ form.order(class="form-control" + (" is-invalid" if form.order.errors else ""),
+                        placeholder="Display order (default: 0)") }}
+                        {% if form.order.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.order.errors[0] }}
+                        </div>
+                        {% endif %}
+                        <small class="text-muted">Lower numbers appear first</small>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
+                        {% if election %}
+                        <a href="{{ url_for('admin.view_election', election_id=election.id) }}"
+                            class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                        {% elif candidate %}
+                        <a href="{{ url_for('admin.view_election', election_id=candidate.election_id) }}"
+                            class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                        {% else %}
+                        <a href="{{ url_for('admin.list_elections') }}" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-3 bg-light">
+            <div class="card-body">
+                <h6><i class="bi bi-lightbulb"></i> Tips for Writing Candidate Bios</h6>
+                <ul class="mb-0 small">
+                    <li>Include relevant experience and qualifications</li>
+                    <li>Highlight key platform points or goals</li>
+                    <li>Keep it concise but informative (200-500 words)</li>
+                    <li>Use professional and objective language</li>
+                    <li>Verify information accuracy before submission</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

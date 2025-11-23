@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Users - Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="bi bi-people"></i> Manage Users</h4>
+                    <a href="{{ url_for('admin.create_user') }}" class="btn btn-light">
+                        <i class="bi bi-person-plus"></i> Create New User
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if users %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>2FA</th>
+                                <th>Created At</th>
+                                <th>Last Login</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>
+                                    <strong>{{ user.username }}</strong>
+                                    {% if user.failed_login_attempts >= 5 %}
+                                    <span class="badge bg-danger ms-1">Locked</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ user.email if user.email else '<em class="text-muted">N/A</em>' }}</td>
+                                <td>
+                                    {% if user.role.value == 'administrator' %}
+                                    <span class="badge bg-danger">Administrator</span>
+                                    {% elif user.role.value == 'auditor' %}
+                                    <span class="badge bg-info">Auditor</span>
+                                    {% elif user.role.value == 'voter' %}
+                                    <span class="badge bg-success">Voter</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if user.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if user.is_2fa_enabled %}
+                                    <i class="bi bi-shield-check text-success" title="2FA Enabled"></i>
+                                    {% else %}
+                                    <i class="bi bi-shield-x text-muted" title="2FA Disabled"></i>
+                                    {% endif %}
+                                </td>
+                                <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>{{ user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else 'Never' }}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('admin.edit_user', user_id=user.id) }}"
+                                            class="btn btn-outline-warning">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        {% if user.id != current_user.id and user.votes.count() == 0 %}
+                                        <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}"
+                                            class="d-inline">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn btn-outline-danger"
+                                                onclick="return confirm('Are you sure you want to delete user {{ user.username }}? This cannot be undone.')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- User Statistics -->
+                <div class="row mt-4">
+                    <div class="col-md-3">
+                        <div class="card bg-light text-center">
+                            <div class="card-body">
+                                <h3 class="mb-0">{{ users|length }}</h3>
+                                <small class="text-muted">Total Users</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light text-center">
+                            <div class="card-body">
+                                <h3 class="mb-0">{{ users|selectattr('role.value', 'equalto', 'voter')|list|length }}
+                                </h3>
+                                <small class="text-muted">Voters</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light text-center">
+                            <div class="card-body">
+                                <h3 class="mb-0">{{ users|selectattr('role.value', 'equalto', 'admin')|list|length }}
+                                </h3>
+                                <small class="text-muted">Administrators</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light text-center">
+                            <div class="card-body">
+                                <h3 class="mb-0">{{ users|selectattr('is_2fa_enabled', 'equalto', true)|list|length }}
+                                </h3>
+                                <small class="text-muted">2FA Enabled</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    No users found. <a href="{{ url_for('admin.create_user') }}">Create your first user</a>.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mt-3 bg-light">
+            <div class="card-body">
+                <h6><i class="bi bi-info-circle"></i> User Management Tips</h6>
+                <ul class="mb-0 small">
+                    <li><strong>Locked accounts:</strong> Accounts with 5+ failed login attempts are automatically
+                        locked for 30 minutes</li>
+                    <li><strong>2FA:</strong> Encourage all users to enable two-factor authentication for enhanced
+                        security</li>
+                    <li><strong>Roles:</strong> Voter (cast votes), Administrator (manage elections), Auditor (view
+                        logs)</li>
+                    <li><strong>Inactive users:</strong> Inactive accounts cannot log in or perform any actions</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

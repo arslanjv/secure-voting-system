@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Auditor Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <h2 class="mb-4">
+            <i class="bi bi-shield-check"></i> Auditor Dashboard
+        </h2>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0">Total Audit Logs</h6>
+                        <h2 class="mb-0">{{ total_logs }}</h2>
+                    </div>
+                    <i class="bi bi-file-text" style="font-size: 3rem; opacity: 0.5;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0">Total Elections</h6>
+                        <h2 class="mb-0">{{ total_elections }}</h2>
+                    </div>
+                    <i class="bi bi-ballot-check" style="font-size: 3rem; opacity: 0.5;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0">Total Votes Cast</h6>
+                        <h2 class="mb-0">{{ total_votes }}</h2>
+                    </div>
+                    <i class="bi bi-check2-circle" style="font-size: 3rem; opacity: 0.5;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="bi bi-lightning"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('auditor.view_logs') }}" class="btn btn-outline-info w-100">
+                            <i class="bi bi-file-text"></i> View All Logs
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('auditor.verify_chain') }}" class="btn btn-outline-warning w-100">
+                            <i class="bi bi-shield-check"></i> Verify Chain
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('auditor.export_logs') }}" class="btn btn-outline-success w-100">
+                            <i class="bi bi-download"></i> Export Logs
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('auditor.view_elections') }}" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-ballot"></i> View Elections
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Critical and Warning Logs -->
+{% if critical_logs %}
+<div class="row mb-4">
+    <div class="col-lg-12">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Recent Critical/Warning Events</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>Description</th>
+                                <th>Severity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in critical_logs %}
+                            <tr>
+                                <td><small>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small></td>
+                                <td>{{ log.username or 'N/A' }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ log.action }}</span>
+                                </td>
+                                <td><small>{{ log.description[:60] if log.description else 'N/A' }}{% if log.description
+                                        and log.description|length > 60 %}...{% endif %}</small></td>
+                                <td>
+                                    <span
+                                        class="badge {% if log.severity == 'CRITICAL' %}bg-danger{% elif log.severity == 'WARNING' %}bg-warning text-dark{% endif %}">
+                                        {{ log.severity }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Recent Audit Logs -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent Activity (Last 50 Logs)</h5>
+                    <a href="{{ url_for('auditor.view_logs') }}" class="btn btn-light btn-sm">View All</a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if recent_logs %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="5%">ID</th>
+                                <th width="15%">Timestamp</th>
+                                <th width="12%">User</th>
+                                <th width="15%">Action</th>
+                                <th>Description</th>
+                                <th width="8%">IP Address</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in recent_logs %}
+                            <tr>
+                                <td>{{ log.id }}</td>
+                                <td><small>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small></td>
+                                <td>{{ log.username or 'N/A' }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if 'login' in log.action.lower() %}bg-success
+                                        {% elif 'vote' in log.action.lower() %}bg-primary
+                                        {% elif 'tally' in log.action.lower() %}bg-warning text-dark
+                                        {% elif 'fail' in log.action.lower() or 'error' in log.action.lower() %}bg-danger
+                                        {% else %}bg-secondary{% endif %}">
+                                        {{ log.action }}
+                                    </span>
+                                </td>
+                                <td><small>{{ log.description[:60] if log.description else 'N/A' }}{% if log.description
+                                        and log.description|length > 60 %}...{% endif %}</small></td>
+                                <td><small>{{ log.ip_address or 'N/A' }}</small></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info mb-0">
+                    <i class="bi bi-info-circle"></i>
+                    No recent audit logs found.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Audit Information -->
+<div class="row mt-4">
+    <div class="col-lg-12">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h6><i class="bi bi-info-circle"></i> Auditor Role Information</h6>
+                <ul class="mb-0 small">
+                    <li><strong>Read-Only Access:</strong> Auditors have read-only access to all system data and logs
+                    </li>
+                    <li><strong>Audit Trail:</strong> All system actions are logged with cryptographic integrity
+                        (blockchain-style chaining)</li>
+                    <li><strong>Chain Verification:</strong> Verify the integrity of the entire audit log chain to
+                        detect tampering</li>
+                    <li><strong>Export Capability:</strong> Export audit logs for external analysis and compliance
+                        reporting</li>
+                    <li><strong>Security Monitoring:</strong> Monitor critical and warning events for security incidents
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

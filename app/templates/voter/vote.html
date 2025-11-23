@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}Cast Vote - {{ election.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .candidate-card {
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+
+    .candidate-card.selected {
+        border: 3px solid #198754;
+        background-color: #d4edda;
+    }
+
+    .candidate-card:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="bi bi-ballot-check"></i> Cast Your Vote</h4>
+            </div>
+            <div class="card-body">
+                <h5>{{ election.title }}</h5>
+                <p class="text-muted">{{ election.description }}</p>
+
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>Important:</strong> You can select up to {{ election.max_selections }} candidate(s).
+                    Your vote will be encrypted before submission.
+                </div>
+
+                <form method="POST" id="voteForm" action="{{ url_for('voter.cast_vote', election_id=election.id) }}">
+                    {{ form.hidden_tag() }}
+
+                    <!-- Hidden fields for encrypted vote -->
+                    {{ form.encrypted_vote(id="encrypted_vote") }}
+                    {{ form.vote_nonce(id="vote_nonce") }}
+                    {{ form.vote_tag(id="vote_tag") }}
+                    {{ form.digital_signature(id="digital_signature") }}
+                    {{ form.request_nonce(id="request_nonce") }}
+
+                    <!-- Candidate Selection -->
+                    <h5 class="mt-4">Select Your Candidate(s)</h5>
+
+                    <div class="row" id="candidatesContainer">
+                        {% for candidate in candidates %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card candidate-card" data-candidate-id="{{ candidate.id }}">
+                                <div class="card-body">
+                                    {% if candidate.photo_url %}
+                                    <img src="{{ candidate.photo_url }}" class="img-fluid rounded mb-2"
+                                        alt="{{ candidate.name }}">
+                                    {% endif %}
+                                    <h5 class="card-title">{{ candidate.name }}</h5>
+                                    <p class="card-text">{{ candidate.description }}</p>
+                                    <div class="form-check">
+                                        <input class="form-check-input candidate-checkbox" type="checkbox"
+                                            name="candidate_ids" value="{{ candidate.id }}"
+                                            id="candidate_{{ candidate.id }}">
+                                        <label class="form-check-label" for="candidate_{{ candidate.id }}">
+                                            Select this candidate
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if form.candidate_ids.errors %}
+                    <div class="alert alert-danger">
+                        {{ form.candidate_ids.errors[0] }}
+                    </div>
+                    {% endif %}
+
+                    <hr>
+
+                    <div class="d-grid gap-2">
+                        <button type="button" id="submitVoteBtn" class="btn btn-success btn-lg">
+                            <i class="bi bi-lock-fill"></i> Encrypt and Submit Vote
+                        </button>
+                        <a href="{{ url_for('voter.dashboard') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+
+                <div id="processingAlert" class="alert alert-info mt-3" style="display: none;">
+                    <div class="d-flex align-items-center">
+                        <div class="spinner-border spinner-border-sm me-2" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <span>Encrypting and signing your vote...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3 bg-light">
+            <div class="card-body">
+                <h6><i class="bi bi-shield-check"></i> Security Information</h6>
+                <ul class="small mb-0">
+                    <li>Your vote is encrypted with AES-256-GCM before leaving your browser</li>
+                    <li>A digital signature ensures vote integrity</li>
+                    <li>Your identity is not linked to your encrypted ballot</li>
+                    <li>You will receive a verification token to confirm your vote</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/vote-encrypt.js') }}"></script>
+<script nonce="{{ csp_nonce() }}">
+    const maxSelections = {{ election.max_selections }};
+    const electionId = {{ election.id }};
+
+    // Handle candidate card selection
+    document.querySelectorAll('.candidate-card').forEach(card => {
+        card.addEventListener('click', function (e) {
+            if (e.target.type !== 'checkbox') {
+                const checkbox = this.querySelector('.candidate-checkbox');
+                checkbox.checked = !checkbox.checked;
+                checkbox.dispatchEvent(new Event('change'));
+            }
+        });
+    });
+
+    // Handle checkbox changes
+    document.querySelectorAll('.candidate-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function () {
+            const card = this.closest('.candidate-card');
+            if (this.checked) {
+                card.classList.add('selected');
+
+                // Check max selections
+                const selectedCount = document.querySelectorAll('.candidate-checkbox:checked').length;
+                if (selectedCount > maxSelections) {
+                    this.checked = false;
+                    card.classList.remove('selected');
+                    alert(`You can only select up to ${maxSelections} candidate(s)`);
+                }
+            } else {
+                card.classList.remove('selected');
+            }
+        });
+    });
+
+    // Handle vote submission
+    document.getElementById('submitVoteBtn').addEventListener('click', async function () {
+        console.log('Submit button clicked');
+
+        const selectedCheckboxes = document.querySelectorAll('.candidate-checkbox:checked');
+        console.log('Selected checkboxes:', selectedCheckboxes.length);
+
+        if (selectedCheckboxes.length === 0) {
+            alert('Please select at least one candidate');
+            return;
+        }
+
+        if (selectedCheckboxes.length > maxSelections) {
+            alert(`You can only select up to ${maxSelections} candidate(s)`);
+            return;
+        }
+
+        // Confirm vote
+        if (!confirm(`You have selected ${selectedCheckboxes.length} candidate(s). Are you sure you want to submit your vote?`)) {
+            console.log('User cancelled confirmation');
+            return;
+        }
+
+        console.log('Starting vote encryption process...');
+
+        // Show processing message
+        document.getElementById('processingAlert').style.display = 'block';
+        this.disabled = true;
+
+        // Get selected candidate IDs
+        const candidateIds = Array.from(selectedCheckboxes).map(cb => parseInt(cb.value));
+        console.log('Candidate IDs:', candidateIds);
+
+        try {
+            // Generate nonce
+            console.log('Generating nonce...');
+            const nonce = await generateNonce();
+            console.log('Nonce generated:', nonce);
+            document.getElementById('request_nonce').value = nonce;
+
+            // Encrypt vote
+            console.log('Encrypting vote...');
+            const encryptedData = await encryptVote(candidateIds);
+            console.log('Vote encrypted successfully');
+            document.getElementById('encrypted_vote').value = encryptedData.ciphertext;
+            document.getElementById('vote_nonce').value = encryptedData.nonce;
+            document.getElementById('vote_tag').value = encryptedData.tag;
+
+            // Sign vote
+            console.log('Signing vote...');
+            const signature = await signVote(JSON.stringify(candidateIds));
+            console.log('Vote signed successfully');
+            document.getElementById('digital_signature').value = signature;
+
+            // Submit form
+            console.log('Submitting form...');
+            document.getElementById('voteForm').submit();
+
+        } catch (error) {
+            console.error('Vote encryption error:', error);
+            alert('An error occurred while encrypting your vote. Please try again.');
+            document.getElementById('processingAlert').style.display = 'none';
+            this.disabled = false;
+        }
+    });
+
+    // Async function to generate nonce
+    async function generateNonce() {
+        try {
+            const response = await fetch('{{ url_for("voter.generate_nonce") }}');
+            if (!response.ok) {
+                throw new Error('Failed to generate nonce');
+            }
+            const data = await response.json();
+            return data.nonce;
+        } catch (error) {
+            console.error('Nonce generation error:', error);
+            // Fallback to client-side nonce generation
+            return generateSecureNonce();
+        }
+    }
+</script>
+{% endblock %}

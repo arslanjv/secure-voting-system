@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}{{ election.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">{{ election.title }}</h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Status:</strong></p>
+                        {% if election.status.value == 'draft' %}
+                        <span class="badge bg-secondary">Draft</span>
+                        {% elif election.status.value == 'active' %}
+                        <span class="badge bg-success">Active - Voting Open</span>
+                        {% elif election.status.value == 'closed' %}
+                        <span class="badge bg-warning text-dark">Closed</span>
+                        {% elif election.status.value == 'tallied' %}
+                        <span class="badge bg-info">Tallied - Results Available</span>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Voting Period:</strong></p>
+                        <p>{{ election.start_time.strftime('%Y-%m-%d %H:%M') }} to {{
+                            election.end_time.strftime('%Y-%m-%d %H:%M') }}</p>
+                    </div>
+                </div>
+
+                <h5>Description</h5>
+                <p>{{ election.description }}</p>
+
+                <h5>Selection Rules</h5>
+                <ul>
+                    <li><strong>Minimum Selections:</strong> {{ election.min_selections }}</li>
+                    <li><strong>Maximum Selections:</strong> {{ election.max_selections }}</li>
+                </ul>
+
+                <h5>Candidates</h5>
+                {% if election.candidates %}
+                <div class="row">
+                    {% for candidate in election.candidates|sort(attribute='name') %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">{{ candidate.name }}</h6>
+                                <p class="card-text mb-1">
+                                    <strong>Party:</strong> {{ candidate.party }}<br>
+                                    <strong>Bio:</strong> {{ candidate.bio }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    No candidates have been added to this election yet.
+                </div>
+                {% endif %}
+
+                <hr>
+
+                {% if has_voted %}
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle"></i>
+                    <strong>You have already voted in this election.</strong>
+                </div>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('voter.view_receipt', vote_id=vote.id) }}" class="btn btn-info">
+                        <i class="bi bi-receipt"></i> View Receipt
+                    </a>
+                    <a href="{{ url_for('voter.dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+                {% elif election.status.value == 'active' %}
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('voter.cast_vote', election_id=election.id) }}" class="btn btn-success btn-lg">
+                        <i class="bi bi-check-square"></i> Cast Your Vote Now
+                    </a>
+                    <a href="{{ url_for('voter.dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Voting is not currently open for this election.
+                </div>
+                <div class="d-grid gap-2">
+                    {% if election.status.value == 'tallied' %}
+                    <a href="{{ url_for('voter.view_results', election_id=election.id) }}" class="btn btn-primary">
+                        <i class="bi bi-bar-chart"></i> View Results
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('voter.dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card bg-light">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-shield-check"></i> Security Information</h6>
+            </div>
+            <div class="card-body">
+                <p class="small">
+                    <i class="bi bi-lock"></i> <strong>Your vote is encrypted</strong><br>
+                    All votes are encrypted using AES-256-GCM before storage.
+                </p>
+                <p class="small">
+                    <i class="bi bi-eye-slash"></i> <strong>Your vote is secret</strong><br>
+                    Your vote cannot be linked back to your identity.
+                </p>
+                <p class="small">
+                    <i class="bi bi-check-circle"></i> <strong>Your vote is verifiable</strong><br>
+                    You'll receive a verification token to confirm your vote was recorded.
+                </p>
+                <p class="small mb-0">
+                    <i class="bi bi-shield"></i> <strong>Your vote is tamper-proof</strong><br>
+                    Digital signatures ensure vote integrity.
+                </p>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-info-circle"></i> Voting Instructions</h6>
+            </div>
+            <div class="card-body">
+                <ol class="small mb-0">
+                    <li>Review all candidates carefully</li>
+                    <li>Select between {{ election.min_selections }} and {{ election.max_selections }} candidate(s)</li>
+                    <li>Click "Submit Vote" when ready</li>
+                    <li>Save your verification token</li>
+                    <li>Verify your vote was recorded</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

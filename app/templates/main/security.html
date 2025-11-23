@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Security Information{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0"><i class="bi bi-shield-lock"></i> Security Information</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success">
+                    <h5><i class="bi bi-check-circle"></i> Your Security is Our Priority</h5>
+                    <p class="mb-0">
+                        This voting system implements multiple layers of security to protect your vote and personal
+                        information.
+                        Learn more about our security measures below.
+                    </p>
+                </div>
+
+                <h5>Cryptographic Security</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0">AES-256-GCM Encryption</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>What it does:</strong> Encrypts your vote so only authorized administrators
+                                    can decrypt it during official tallying.</p>
+                                <p><strong>How it works:</strong> Uses 256-bit keys with Galois/Counter Mode for
+                                    authenticated encryption.</p>
+                                <p><strong>Security level:</strong> Military-grade encryption, resistant to all known
+                                    attacks.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0">Ed25519 Digital Signatures</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>What it does:</strong> Proves your vote hasn't been tampered with after
+                                    submission.</p>
+                                <p><strong>How it works:</strong> Creates cryptographic signatures using elliptic curve
+                                    cryptography.</p>
+                                <p><strong>Security level:</strong> 128-bit security equivalent, fast and secure.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h5>Authentication Security</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0">Argon2 Password Hashing</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>What it does:</strong> Protects your password even if the database is
+                                    compromised.</p>
+                                <p><strong>How it works:</strong> Uses memory-hard hashing with 64MB memory cost and 3
+                                    iterations.</p>
+                                <p><strong>Security level:</strong> Winner of Password Hashing Competition, resistant to
+                                    GPU/ASIC attacks.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header bg-warning text-dark">
+                                <h6 class="mb-0">TOTP Two-Factor Authentication</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>What it does:</strong> Adds a second layer of protection beyond your
+                                    password.</p>
+                                <p><strong>How it works:</strong> Generates time-based one-time codes using HMAC-SHA1.
+                                </p>
+                                <p><strong>Security level:</strong> Protects against password theft and phishing
+                                    attacks.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h5>Application Security</h5>
+                <ul>
+                    <li><strong>CSRF Protection:</strong> Prevents cross-site request forgery attacks on all forms</li>
+                    <li><strong>SQL Injection Prevention:</strong> ORM-only queries, no raw SQL execution</li>
+                    <li><strong>XSS Protection:</strong> Input sanitization and output encoding on all user data</li>
+                    <li><strong>Rate Limiting:</strong> Prevents brute force and denial-of-service attacks</li>
+                    <li><strong>Account Lockout:</strong> Automatically locks accounts after 5 failed login attempts
+                    </li>
+                    <li><strong>Session Security:</strong> HttpOnly, Secure, SameSite cookies with 30-minute timeout
+                    </li>
+                    <li><strong>HTTPS Enforcement:</strong> TLS 1.3 only, HSTS enabled with 1-year duration</li>
+                    <li><strong>Content Security Policy:</strong> Prevents unauthorized script execution</li>
+                </ul>
+
+                <h5>Audit & Transparency</h5>
+                <div class="card bg-light mb-3">
+                    <div class="card-body">
+                        <h6><i class="bi bi-file-text"></i> Blockchain-Style Audit Logs</h6>
+                        <p>
+                            Every action in the system is logged with cryptographic chaining. Each audit log entry
+                            contains:
+                        </p>
+                        <ul>
+                            <li>SHA-256 hash of the previous entry (creating an immutable chain)</li>
+                            <li>Timestamp and user information</li>
+                            <li>Action performed and details</li>
+                            <li>Digital signature for verification</li>
+                        </ul>
+                        <p class="mb-0">
+                            <strong>Auditors can verify:</strong> Any tampering with audit logs will break the
+                            cryptographic chain,
+                            making it immediately detectable.
+                        </p>
+                    </div>
+                </div>
+
+                <h5>Vote Verification</h5>
+                <div class="card bg-light mb-3">
+                    <div class="card-body">
+                        <h6><i class="bi bi-check-circle"></i> Individual Verifiability</h6>
+                        <p>
+                            After voting, you receive a unique verification token. You can use this token to:
+                        </p>
+                        <ul>
+                            <li>Verify your vote was recorded in the system</li>
+                            <li>Check your vote hasn't been altered</li>
+                            <li>Confirm your vote will be counted in the final tally</li>
+                        </ul>
+                        <p class="mb-0">
+                            <strong>Privacy protected:</strong> The verification system doesn't reveal your vote choice,
+                            only that your encrypted vote exists in the database.
+                        </p>
+                    </div>
+                </div>
+
+                <h5>Security Best Practices</h5>
+                <div class="alert alert-warning">
+                    <h6><i class="bi bi-exclamation-triangle"></i> How You Can Stay Secure:</h6>
+                    <ul class="mb-0">
+                        <li><strong>Use strong passwords:</strong> At least 12 characters with uppercase, lowercase,
+                            numbers, and symbols</li>
+                        <li><strong>Enable 2FA:</strong> Always enable two-factor authentication for your account</li>
+                        <li><strong>Keep credentials private:</strong> Never share your password or 2FA codes</li>
+                        <li><strong>Log out after voting:</strong> Always log out when finished, especially on shared
+                            computers</li>
+                        <li><strong>Verify SSL/TLS:</strong> Check for the padlock icon in your browser before entering
+                            credentials</li>
+                        <li><strong>Save your verification token:</strong> Keep your vote verification token secure but
+                            accessible</li>
+                        <li><strong>Report suspicious activity:</strong> Contact administrators if you notice anything
+                            unusual</li>
+                    </ul>
+                </div>
+
+                <h5>Compliance & Standards</h5>
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3">
+                        <div class="security-badge">OWASP Top 10</div>
+                        <small class="text-muted">Protection against common vulnerabilities</small>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="security-badge">NIST SSDF</div>
+                        <small class="text-muted">Secure software development</small>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="security-badge">UMLSec</div>
+                        <small class="text-muted">Security-focused design</small>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="security-badge">Secure-SDLC</div>
+                        <small class="text-muted">Security throughout lifecycle</small>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-4">
+                    <h6><i class="bi bi-question-circle"></i> Questions About Security?</h6>
+                    <p class="mb-0">
+                        If you have security concerns or questions, please contact the system administrators.
+                        For security vulnerabilities, please report them responsibly to the appropriate authorities.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
