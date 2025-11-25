@@ -29,7 +29,7 @@ A production-ready, military-grade secure online voting system built with Flask,
 
 ## 📋 Requirements
 
-- Python 3.11+
+- Python 3.11+ (tested on Python 3.12.0)
 - SQLite (development) or PostgreSQL 12+ (production)
 - Modern browser with Web Crypto API support
 - Email account with SMTP access (Gmail, Outlook, etc.) for invite system
