@@ -89,7 +89,7 @@ class Config:
         'base-uri': ["'self'"],
         'form-action': ["'self'"],
         'object-src': ["'none'"],
-        'upgrade-insecure-requests': True
+        'upgrade-insecure-requests': []
     }
     # Enable nonces for script-src to replace 'unsafe-inline'
     TALISMAN_CONTENT_SECURITY_POLICY_NONCE_IN = ['script-src']
@@ -243,3 +243,4 @@ config = {
     'testing': TestingConfig,
     'default': DevelopmentConfig
 }
+
