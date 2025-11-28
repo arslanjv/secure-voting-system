@@ -487,7 +487,7 @@ This scans all Python files in the `app/` directory for common security issues.
 | Auth | Flask-Login | 0.6.3 | Session management |
 | 2FA | pyotp | 2.9.0 | TOTP authentication |
 | Encryption | PyCryptodome | 3.19.0 | Vote encryption |
-| Signatures | cryptography | 41.0.7 | Digital signatures |
+| Signatures | cryptography | 43.0.1+ | Digital signatures |
 | Password | Argon2 | 23.1.0 | Password hashing |
 | Email | smtplib | Built-in | Invite email sending |
 | Frontend | Bootstrap 5 | 5.3.2 | UI framework |
