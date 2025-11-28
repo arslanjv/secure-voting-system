@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
 {% block title %}Cast Vote - {{ election.title }}{% endblock %}
 
@@ -40,10 +40,12 @@
                 <form method="POST" id="voteForm" action="{{ url_for('voter.cast_vote', election_id=election.id) }}">
                     {{ form.hidden_tag() }}
 
-                    <!-- Hidden fields for encrypted vote -->
+                    <!-- Hidden fields for encrypted vote (hybrid encryption) -->
                     {{ form.encrypted_vote(id="encrypted_vote") }}
                     {{ form.vote_nonce(id="vote_nonce") }}
                     {{ form.vote_tag(id="vote_tag") }}
+                    <!-- RSA-encrypted AES key for hybrid encryption (VULN-001/002 fix) -->
+                    {{ form.encrypted_key(id="encrypted_key") }}
                     {{ form.digital_signature(id="digital_signature") }}
                     {{ form.request_nonce(id="request_nonce") }}
 
@@ -108,7 +110,8 @@
             <div class="card-body">
                 <h6><i class="bi bi-shield-check"></i> Security Information</h6>
                 <ul class="small mb-0">
-                    <li>Your vote is encrypted with AES-256-GCM before leaving your browser</li>
+                    <li>Your vote is encrypted with RSA-4096 + AES-256-GCM hybrid encryption</li>
+                    <li>A unique encryption key is generated for each vote</li>
                     <li>A digital signature ensures vote integrity</li>
                     <li>Your identity is not linked to your encrypted ballot</li>
                     <li>You will receive a verification token to confirm your vote</li>
@@ -196,13 +199,15 @@
             console.log('Nonce generated:', nonce);
             document.getElementById('request_nonce').value = nonce;
 
-            // Encrypt vote
-            console.log('Encrypting vote...');
-            const encryptedData = await encryptVote(candidateIds);
+            // Encrypt vote using hybrid encryption (fetches public key from server)
+            console.log('Encrypting vote with hybrid RSA-AES encryption...');
+            const encryptedData = await encryptVote(candidateIds, electionId);
             console.log('Vote encrypted successfully');
+            
             document.getElementById('encrypted_vote').value = encryptedData.ciphertext;
             document.getElementById('vote_nonce').value = encryptedData.nonce;
             document.getElementById('vote_tag').value = encryptedData.tag;
+            document.getElementById('encrypted_key').value = encryptedData.encryptedKey;
 
             // Sign vote
             console.log('Signing vote...');
@@ -216,7 +221,7 @@
 
         } catch (error) {
             console.error('Vote encryption error:', error);
-            alert('An error occurred while encrypting your vote. Please try again.');
+            alert('An error occurred while encrypting your vote. Please try again.\n\nDetails: ' + error.message);
             document.getElementById('processingAlert').style.display = 'none';
             this.disabled = false;
         }

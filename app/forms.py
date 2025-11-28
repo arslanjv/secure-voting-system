@@ -1,4 +1,4 @@
-"""
+﻿"""
 Flask Forms with CSRF Protection
 All forms include validation, sanitization, and security measures
 """
@@ -18,7 +18,7 @@ import bleach
 
 class SecureForm(FlaskForm):
     """Base form with additional security"""
-    
+
     def sanitize_string(self, value):
         """Sanitize string input to prevent XSS"""
         if value is None:
@@ -37,19 +37,39 @@ class LoginForm(SecureForm):
     ])
     remember_me = BooleanField('Remember Me')
     submit = SubmitField('Login')
-    
+
     def validate_username(self, field):
         field.data = self.sanitize_string(field.data)
 
 
 class TwoFactorForm(SecureForm):
-    """Two-factor authentication token form"""
+    """
+    Two-factor authentication token form
+    Accepts either:
+    - 6-digit TOTP code
+    - 8-character backup code (alphanumeric uppercase)
+    """
     token = StringField('Authentication Code', validators=[
         DataRequired(message='Authentication code is required'),
-        Length(min=6, max=6, message='Code must be 6 digits'),
-        Regexp(r'^\d{6}$', message='Code must be 6 digits')
+        Length(min=6, max=8, message='Code must be 6 digits or 8-character backup code')
     ])
     submit = SubmitField('Verify')
+
+    def validate_token(self, field):
+        """Validate token format - either TOTP or backup code"""
+        value = field.data.strip().upper()
+        
+        # Check if it's a 6-digit TOTP code
+        if len(value) == 6 and value.isdigit():
+            field.data = value
+            return
+        
+        # Check if it's an 8-character backup code (alphanumeric)
+        if len(value) == 8 and value.isalnum():
+            field.data = value
+            return
+        
+        raise ValidationError('Invalid code format. Enter a 6-digit TOTP code or 8-character backup code.')
 
 
 class RegistrationForm(SecureForm):
@@ -77,13 +97,13 @@ class RegistrationForm(SecureForm):
         EqualTo('password', message='Passwords must match')
     ])
     submit = SubmitField('Register')
-    
+
     def validate_username(self, field):
         field.data = self.sanitize_string(field.data)
-    
+
     def validate_email(self, field):
         field.data = self.sanitize_string(field.data)
-    
+
     def validate_invite_token(self, field):
         """Validate invite token exists and is valid"""
         from app.models import InviteToken
@@ -149,7 +169,7 @@ class InviteSingleUserForm(SecureForm):
         Length(max=120)
     ])
     submit = SubmitField('Send Invite Email')
-    
+
     def validate_email(self, field):
         field.data = self.sanitize_string(field.data)
         # Check if user already exists
@@ -181,6 +201,14 @@ class Enable2FAForm(SecureForm):
     submit = SubmitField('Enable 2FA')
 
 
+class RegenerateBackupCodesForm(SecureForm):
+    """Regenerate 2FA backup codes"""
+    current_password = PasswordField('Current Password', validators=[
+        DataRequired(message='Password is required to regenerate backup codes')
+    ])
+    submit = SubmitField('Regenerate Backup Codes')
+
+
 class ElectionForm(SecureForm):
     """Create/edit election form"""
     title = StringField('Election Title', validators=[
@@ -204,19 +232,19 @@ class ElectionForm(SecureForm):
     )
     allow_multiple_votes = BooleanField('Allow voters to change their vote')
     submit = SubmitField('Save Election')
-    
+
     def validate_title(self, field):
         field.data = self.sanitize_string(field.data)
-    
+
     def validate_description(self, field):
         if field.data:
             field.data = self.sanitize_string(field.data)
-    
+
     def validate_end_time(self, field):
         if field.data and self.start_time.data:
             if field.data <= self.start_time.data:
                 raise ValidationError('End time must be after start time')
-    
+
     def validate_max_selections(self, field):
         if field.data and field.data < 1:
             raise ValidationError('Maximum selections must be at least 1')
@@ -240,10 +268,10 @@ class CandidateForm(SecureForm):
         Optional()
     ], default=0)
     submit = SubmitField('Save Candidate')
-    
+
     def validate_name(self, field):
         field.data = self.sanitize_string(field.data)
-    
+
     def validate_description(self, field):
         if field.data:
             field.data = self.sanitize_string(field.data)
@@ -253,8 +281,9 @@ class VoteForm(SecureForm):
     """
     Vote submission form
     Dynamic - candidates populated at runtime
+    Now supports hybrid encryption with RSA-wrapped AES key
     """
-    # Encrypted vote data (prepared client-side)
+    # Encrypted vote data (prepared client-side with AES-256-GCM)
     encrypted_vote = HiddenField('Encrypted Vote', validators=[
         DataRequired(message='Vote data is required')
     ])
@@ -264,18 +293,22 @@ class VoteForm(SecureForm):
     vote_tag = HiddenField('Vote Tag', validators=[
         DataRequired(message='Vote tag is required')
     ])
+    # RSA-encrypted AES key (new for hybrid encryption)
+    encrypted_key = HiddenField('Encrypted Key', validators=[
+        Optional()  # Optional for backward compatibility with legacy votes
+    ])
     digital_signature = HiddenField('Digital Signature', validators=[
         DataRequired(message='Digital signature is required')
     ])
     request_nonce = HiddenField('Request Nonce', validators=[
         DataRequired(message='Request nonce is required')
     ])
-    
+
     # Visible candidate selection (for JS to encrypt)
     candidate_ids = SelectMultipleField('Select Candidate(s)', coerce=int, validators=[
         DataRequired(message='Please select at least one candidate')
     ])
-    
+
     submit = SubmitField('Cast Vote')
 
 

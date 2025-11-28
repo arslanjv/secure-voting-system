@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Backup Codes - Secure Voting System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0"><i class="bi bi-shield-exclamation"></i> Save Your Backup Codes</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger">
+                    <strong><i class="bi bi-exclamation-triangle-fill"></i> Important!</strong>
+                    <p class="mb-0">
+                        These backup codes can be used to access your account if you lose your authenticator device.
+                        <strong>This is the only time these codes will be displayed.</strong>
+                        Store them in a secure location.
+                    </p>
+                </div>
+
+                <div class="card bg-light mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Your Backup Codes</h5>
+                        <p class="text-muted small">Each code can only be used once.</p>
+                        
+                        <div class="row">
+                            {% for code in backup_codes %}
+                            <div class="col-6 col-md-4 mb-2">
+                                <code class="fs-5 user-select-all">{{ code }}</code>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 flex-wrap">
+                    <button type="button" class="btn btn-outline-primary" onclick="copyBackupCodes()">
+                        <i class="bi bi-clipboard"></i> Copy All Codes
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="printBackupCodes()">
+                        <i class="bi bi-printer"></i> Print Codes
+                    </button>
+                </div>
+
+                <hr>
+
+                <div class="alert alert-info">
+                    <h6><i class="bi bi-info-circle"></i> How to use backup codes:</h6>
+                    <ul class="mb-0">
+                        <li>When prompted for your 2FA code, enter a backup code instead</li>
+                        <li>Each backup code can only be used once</li>
+                        <li>You have {{ backup_codes|length }} backup codes</li>
+                        <li>You can regenerate new codes from your profile settings</li>
+                    </ul>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('auth.profile') }}" class="btn btn-success btn-lg">
+                        <i class="bi bi-check-circle"></i> I've Saved My Codes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script nonce="{{ csp_nonce() }}">
+function copyBackupCodes() {
+    const codes = [
+        {% for code in backup_codes %}'{{ code }}'{% if not loop.last %}, {% endif %}{% endfor %}
+    ];
+    const text = 'Secure Voting System - Backup Codes\n' + 
+                 '=====================================\n' +
+                 codes.join('\n') +
+                 '\n\nGenerated: {{ now().strftime("%Y-%m-%d %H:%M:%S") if now is defined else "Today" }}';
+    
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Backup codes copied to clipboard!');
+    }).catch(err => {
+        alert('Failed to copy. Please manually select and copy the codes.');
+    });
+}
+
+function printBackupCodes() {
+    window.print();
+}
+</script>
+
+<style>
+@media print {
+    .btn, .alert-info, nav, footer {
+        display: none !important;
+    }
+    .card {
+        border: 1px solid #000 !important;
+    }
+}
+</style>
+{% endblock %}
