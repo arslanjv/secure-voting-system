@@ -1,10 +1,10 @@
 # Core Flask Framework
 Flask==3.0.0
-Werkzeug==3.0.1
+Werkzeug>=3.0.6
 
 # Database
 Flask-SQLAlchemy==3.1.1
-SQLAlchemy==2.0.23
+SQLAlchemy>=2.0.23
 psycopg2-binary==2.9.9
 PyMySQL==1.1.0
 
@@ -19,11 +19,11 @@ argon2-cffi==23.1.0
 # Two-Factor Authentication (TOTP)
 pyotp==2.9.0
 qrcode==7.4.2
-Pillow==10.1.0
+Pillow>=10.1.0
 
 # Cryptography
 pycryptodome==3.19.0
-cryptography==41.0.7
+cryptography>=43.0.1
 
 # Security Headers & CSRF
 Flask-Talisman==1.1.0
