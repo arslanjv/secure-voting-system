@@ -1,6 +1,6 @@
 # Secure Online Voting System
 
-A production-ready, military-grade secure online voting system built with Flask, implementing end-to-end encryption, cryptographic verification, invite-based registration, and comprehensive security measures following OWASP Top 10, NIST SSDF, and UMLSec principles.
+A production-ready, military-grade secure online voting system built with Flask, implementing end-to-end encryption, cryptographic verification, invite-based registration and comprehensive security measures following OWASP Top 10, NIST SSDF and UMLSec principles.
 
 ## 🔒 Security Features
 
@@ -186,7 +186,7 @@ secure-voting-system/
 ├── .env                         # Environment variables (create from .env.example)
 ├── .env.example                 # Environment template
 ├── .gitignore                   # Git ignore patterns
-├── README.md                    # This file
+├── README.md                    # Readme (This file)
 └── EMAIL_SETUP_GUIDE.md         # Email configuration guide
 ```
 
