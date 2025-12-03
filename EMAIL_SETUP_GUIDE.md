@@ -123,7 +123,7 @@ from flask import url_for
 success, error = send_invite_email(
     'test@example.com',
     'test-token-123',
-    'http://localhost:5000/auth/register?token=test-token-123'
+    'https://localhost:5001/auth/register?token=test-token-123'
 )
 
 print(f"Success: {success}")
