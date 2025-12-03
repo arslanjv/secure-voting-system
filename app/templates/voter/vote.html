@@ -204,10 +204,11 @@
             const encryptedData = await encryptVote(candidateIds, electionId);
             console.log('Vote encrypted successfully');
             
-            document.getElementById('encrypted_vote').value = encryptedData.ciphertext;
-            document.getElementById('vote_nonce').value = encryptedData.nonce;
+            // Use encrypted_vote which contains full ciphertext+tag for server decryption
+            document.getElementById('encrypted_vote').value = encryptedData.encrypted_vote;
+            document.getElementById('vote_nonce').value = encryptedData.iv;
             document.getElementById('vote_tag').value = encryptedData.tag;
-            document.getElementById('encrypted_key').value = encryptedData.encryptedKey;
+            document.getElementById('encrypted_key').value = encryptedData.encrypted_key;
 
             // Sign vote
             console.log('Signing vote...');

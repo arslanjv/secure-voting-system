@@ -207,8 +207,8 @@
             <div class="card-body">
                 <p class="small mb-2"><strong>Encryption:</strong></p>
                 <p class="small mb-3">
-                    {% if election.encryption_public_key %}
-                    <span class="badge bg-success">AES-256-GCM Enabled</span>
+                    {% if election.keypair %}
+                    <span class="badge bg-success">RSA-4096 + AES-256-GCM Active</span>
                     {% else %}
                     <span class="badge bg-warning text-dark">Not Generated</span>
                     {% endif %}

@@ -135,7 +135,6 @@ def view_election(election_id):
 @voter_bp.route('/election/<int:election_id>/vote', methods=['GET', 'POST'])
 @login_required
 @voter_required
-@limiter.limit("3 per minute")
 def cast_vote(election_id):
     """Cast vote in an election"""
     election = Election.query.get_or_404(election_id)

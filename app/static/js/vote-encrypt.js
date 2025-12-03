@@ -319,7 +319,21 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 
 // Browser compatibility check
-if (typeof crypto === 'undefined' || !crypto.subtle) {
-    console.error('Web Crypto API not available. Please use a modern browser with HTTPS.');
-    alert('Your browser does not support the required cryptographic features. Please use a modern browser with HTTPS.');
-}
+// Web Crypto API requires a "secure context": HTTPS, localhost, or 127.0.0.1
+(function() {
+    const isSecureContext = window.isSecureContext || 
+                            location.hostname === 'localhost' || 
+                            location.hostname === '127.0.0.1';
+    
+    if (typeof crypto === 'undefined' || !crypto.subtle) {
+        const msg = isSecureContext
+            ? 'Your browser does not support the required cryptographic features. Please use a modern browser (Chrome, Firefox, Edge, Safari).'
+            : 'Encryption requires a secure connection. Please access the site via:\n\n' +
+              '• http://localhost:5000 (recommended for local testing)\n' +
+              '• https:// with a valid certificate\n\n' +
+              'Current URL (' + location.hostname + ') is not a secure context.';
+        
+        console.error('Web Crypto API not available:', msg);
+        alert(msg);
+    }
+})();

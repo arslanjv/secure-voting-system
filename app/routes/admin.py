@@ -353,7 +353,6 @@ def decrypt_vote_hybrid(vote, keypair):
 @admin_bp.route('/elections/<int:election_id>/tally', methods=['GET', 'POST'])
 @login_required
 @admin_required
-@limiter.limit("3 per hour")
 def tally_election(election_id):
     """Tally election results"""
     election = Election.query.get_or_404(election_id)
@@ -494,7 +493,7 @@ def tally_election(election_id):
 @admin_bp.route('/elections/<int:election_id>/retally', methods=['POST'])
 @login_required
 @admin_required
-@limiter.limit("2 per hour")
+@limiter.limit("30 per hour")
 def retally_election(election_id):
     """Reset election to closed status and clear tally data"""
     election = Election.query.get_or_404(election_id)
@@ -885,8 +884,12 @@ def invite_single():
         db.session.add(invite)
         db.session.commit()
 
-        # Generate registration URL
-        registration_url = url_for('auth.register', token=token, _external=True)
+        # Generate registration URL (use BASE_URL if configured for LAN access)
+        base_url = current_app.config.get('BASE_URL')
+        if base_url:
+            registration_url = f"{base_url.rstrip('/')}/auth/register?token={token}"
+        else:
+            registration_url = url_for('auth.register', token=token, _external=True)
 
         # Send email automatically
         success, error = send_invite_email(form.email.data, token, registration_url)
@@ -971,11 +974,12 @@ def invite_bulk():
         db.session.commit()
 
         # Send emails automatically
+        base_url = current_app.config.get('BASE_URL')
         invite_data_list = [
             {
                 'email': inv.email,
                 'token': inv.token,
-                'url': url_for('auth.register', token=inv.token, _external=True)
+                'url': f"{base_url.rstrip('/')}/auth/register?token={inv.token}" if base_url else url_for('auth.register', token=inv.token, _external=True)
             }
             for inv in created_invites
         ]
@@ -1046,8 +1050,12 @@ def resend_invite(invite_id):
         flash('This invite has expired', 'danger')
         return redirect(url_for('admin.list_invites'))
 
-    # Generate registration URL
-    registration_url = url_for('auth.register', token=invite.token, _external=True)
+    # Generate registration URL (use BASE_URL if configured for LAN access)
+    base_url = current_app.config.get('BASE_URL')
+    if base_url:
+        registration_url = f"{base_url.rstrip('/')}/auth/register?token={invite.token}"
+    else:
+        registration_url = url_for('auth.register', token=invite.token, _external=True)
 
     log_audit('INVITE_RESENT',
              f'Registration link retrieved for: {invite.email}',

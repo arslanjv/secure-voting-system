@@ -25,6 +25,9 @@ class Config:
     if len(SECRET_KEY) < 32:
         raise ValueError("SECRET_KEY must be at least 32 characters for security")
 
+    # Base URL for email links (for LAN/network access)
+    BASE_URL = os.environ.get('BASE_URL')
+
     # Database Configuration
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'postgresql://voting_user:secure_password@localhost:5432/secure_voting_db'
@@ -88,8 +91,8 @@ class Config:
         'frame-ancestors': ["'none'"],
         'base-uri': ["'self'"],
         'form-action': ["'self'"],
-        'object-src': ["'none'"],
-        'upgrade-insecure-requests': []
+        'object-src': ["'none'"]
+        # Removed 'upgrade-insecure-requests' for LAN/development compatibility
     }
     # Enable nonces for script-src to replace 'unsafe-inline'
     TALISMAN_CONTENT_SECURITY_POLICY_NONCE_IN = ['script-src']
